@@ -8,6 +8,7 @@
 #import "RFQuiltLayout.h"
 
 @interface RFQuiltLayout ()
+
 @property(nonatomic) CGPoint firstOpenSpace;
 @property(nonatomic) CGPoint furthestBlockPoint;
 
@@ -31,6 +32,7 @@
 // remember the last indexpath placed, as to not
 // relayout the same indexpaths while scrolling
 @property(nonatomic) NSIndexPath* lastIndexPathPlaced;
+
 @end
 
 
@@ -72,8 +74,9 @@
 }
 
 - (NSArray *)layoutAttributesForElementsInRect:(CGRect)rect {
+
   if (!self.delegate) {
-    return @[];
+    @throw([NSException exceptionWithName:@"NotFound" reason:@"Delegate not set" userInfo:nil]);
   }
 
   // see the comment on these properties
@@ -100,7 +103,7 @@
 
   NSUInteger unrestrictedDimensionEnd = unrestrictedDimensionStart + unrestrictedDimensionLength;
 
-  [self fillInBlocksToUnrestrictedRow:self.prelayoutEverything? INT_MAX : unrestrictedDimensionEnd];
+  [self fillInBlocksToUnrestrictedRow:self.prelayoutEverything ? INT_MAX : unrestrictedDimensionEnd];
 
   // find the indexPaths between those rows
   NSMutableSet* attributes = [NSMutableSet set];
@@ -194,17 +197,17 @@
 
 #pragma mark private methods
 
-- (void) fillInBlocksToUnrestrictedRow:(int)endRow {
+- (void) fillInBlocksToUnrestrictedRow:(NSUInteger)endRow {
 
   // we'll have our data structure as if we're planning
   // a vertical layout, then when we assign positions to
   // the items we'll invert the axis
 
   NSInteger numSections = [self.collectionView numberOfSections];
-  for (NSInteger section=self.lastIndexPathPlaced.section; section<numSections; section++) {
+  for (NSInteger section = self.lastIndexPathPlaced.section; section < numSections; section++) {
     NSInteger numRows = [self.collectionView numberOfItemsInSection:section];
 
-    for (NSInteger row = (!self.lastIndexPathPlaced? 0 : self.lastIndexPathPlaced.row + 1); row<numRows; row++) {
+    for (NSInteger row = (!self.lastIndexPathPlaced? 0 : self.lastIndexPathPlaced.row + 1); row < numRows; row++) {
       NSIndexPath* indexPath = [NSIndexPath indexPathForRow:row inSection:section];
 
       if([self placeBlockAtIndex:indexPath]) {

@@ -12,10 +12,12 @@
 @interface RFViewController () <UICollectionViewDelegate> {
     BOOL isAnimating;
 }
+
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 @property (nonatomic) NSMutableArray* numbers;
 @property (nonatomic) NSMutableArray* numberWidths;
 @property (nonatomic) NSMutableArray* numberHeights;
+
 @end
 
 int num = 0;
