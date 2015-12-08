@@ -78,8 +78,8 @@
     
     BOOL isVert = self.direction == UICollectionViewScrollDirectionVertical;
     
-    int unrestrictedDimensionStart = isVert? rect.origin.y / self.blockPixels.height : rect.origin.x / self.blockPixels.width;
-    int unrestrictedDimensionLength = (isVert? rect.size.height / self.blockPixels.height : rect.size.width / self.blockPixels.width) + 1;
+    int unrestrictedDimensionStart = (int)(isVert? rect.origin.y / self.blockPixels.height : rect.origin.x / self.blockPixels.width);
+    int unrestrictedDimensionLength = (int)(isVert? rect.size.height / self.blockPixels.height : rect.size.width / self.blockPixels.width) + 1;
     int unrestrictedDimensionEnd = unrestrictedDimensionStart + unrestrictedDimensionLength;
     
     [self fillInBlocksToUnrestrictedRow:self.prelayoutEverything? INT_MAX : unrestrictedDimensionEnd];
@@ -144,9 +144,9 @@
     
     int unrestrictedRow = 0;
     if (isVert)
-        unrestrictedRow = (CGRectGetMaxY(scrollFrame) / [self blockPixels].height)+1;
+        unrestrictedRow = (int)(CGRectGetMaxY(scrollFrame) / [self blockPixels].height) + 1;
     else
-        unrestrictedRow = (CGRectGetMaxX(scrollFrame) / [self blockPixels].width)+1;
+        unrestrictedRow = (int)(CGRectGetMaxX(scrollFrame) / [self blockPixels].width) + 1;
     
     [self fillInBlocksToUnrestrictedRow:self.prelayoutEverything? INT_MAX : unrestrictedRow];
 }

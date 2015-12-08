@@ -23,6 +23,7 @@ int num = 0;
 @implementation RFViewController
 
 - (void)viewDidLoad {
+  [super viewDidLoad];
     [self datasInit];
     [self.collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
     
@@ -46,6 +47,7 @@ int num = 0;
   
 }
 - (void) viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
     [self.collectionView reloadData];
 }
 
@@ -90,18 +92,18 @@ int num = 0;
 #pragma mark - UICollectionView Datasource
 
 - (NSInteger)collectionView:(UICollectionView *)view numberOfItemsInSection:(NSInteger)section {
-    return self.numbers.count;
+    return (NSInteger)self.numbers.count;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)cv cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     UICollectionViewCell *cell = [cv dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
-    cell.backgroundColor = [self colorForNumber:self.numbers[indexPath.row]];
+    cell.backgroundColor = [self colorForNumber: self.numbers[(NSUInteger)indexPath.row]];
     
     UILabel* label = (id)[cell viewWithTag:5];
     if(!label) label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 30, 20)];
     label.tag = 5;
     label.textColor = [UIColor blackColor];
-    label.text = [NSString stringWithFormat:@"%@", self.numbers[indexPath.row]];
+    label.text = [NSString stringWithFormat:@"%@", self.numbers[(NSUInteger)indexPath.row]];
     label.backgroundColor = [UIColor clearColor];
     [cell addSubview:label];
     
@@ -117,8 +119,8 @@ int num = 0;
         NSLog(@"Asking for index paths of non-existant cells!! %ld from %lu cells", (long)indexPath.row, (unsigned long)self.numbers.count);
     }
     
-    CGFloat width = [[self.numberWidths objectAtIndex:indexPath.row] floatValue];
-    CGFloat height = [[self.numberHeights objectAtIndex:indexPath.row] floatValue];
+    CGFloat width = [[self.numberWidths objectAtIndex: (NSUInteger)indexPath.row] floatValue];
+    CGFloat height = [[self.numberHeights objectAtIndex: (NSUInteger)indexPath.row] floatValue];
     return CGSizeMake(width, height);
     
     //    if (indexPath.row % 10 == 0)
@@ -149,13 +151,16 @@ int num = 0;
     
     if(isAnimating) return;
     isAnimating = YES;
-    
+
+  RFViewController __weak * weakSelf = self;
     [self.collectionView performBatchUpdates:^{
         NSInteger index = indexPath.row;
-        [self.numbers insertObject:@(++num) atIndex:index];
-        [self.numberWidths insertObject:@(1 + arc4random() % 3) atIndex:index];
-        [self.numberHeights insertObject:@(1 + arc4random() % 3) atIndex:index];
-        [self.collectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]]];
+        [weakSelf.numbers insertObject:@(++num) atIndex: (NSUInteger)index];
+        [weakSelf.numberWidths insertObject:@(1 + arc4random() % 3) atIndex: (NSUInteger)index];
+        [weakSelf.numberHeights insertObject:@(1 + arc4random() % 3) atIndex: (NSUInteger)index];
+        [weakSelf.collectionView insertItemsAtIndexPaths:@[[NSIndexPath
+                                                        indexPathForRow: (NSInteger)index
+                                                        inSection:0]]];
     } completion:^(BOOL done) {
         isAnimating = NO;
     }];
@@ -166,13 +171,14 @@ int num = 0;
     
     if(isAnimating) return;
     isAnimating = YES;
-    
+
+    RFViewController __weak * weakSelf = self;
     [self.collectionView performBatchUpdates:^{
         NSInteger index = indexPath.row;
-        [self.numbers removeObjectAtIndex:index];
-        [self.numberWidths removeObjectAtIndex:index];
-        [self.numberHeights removeObjectAtIndex:index];
-        [self.collectionView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]]];
+        [weakSelf.numbers removeObjectAtIndex:(NSUInteger)index];
+        [weakSelf.numberWidths removeObjectAtIndex: (NSUInteger)index];
+        [weakSelf.numberHeights removeObjectAtIndex: (NSUInteger)index];
+        [weakSelf.collectionView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForRow: (NSInteger)index inSection:0]]];
     } completion:^(BOOL done) {
         isAnimating = NO;
     }];
