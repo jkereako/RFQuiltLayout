@@ -18,7 +18,7 @@
 		02E25B1B168B74B0009CA089 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 02E25B1A168B74B0009CA089 /* Default@2x.png */; };
 		02E25B1D168B74B0009CA089 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 02E25B1C168B74B0009CA089 /* Default-568h@2x.png */; };
 		02E25B20168B74B0009CA089 /* RFViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 02E25B1F168B74B0009CA089 /* RFViewController.m */; };
-		02E25B23168B74B0009CA089 /* RFViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 02E25B21168B74B0009CA089 /* RFViewController.xib */; };
+		36E3D7FD1C17763000B5F93B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 36E3D7FC1C17763000B5F93B /* Main.storyboard */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,7 +39,7 @@
 		02E25B1C168B74B0009CA089 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		02E25B1E168B74B0009CA089 /* RFViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RFViewController.h; sourceTree = "<group>"; };
 		02E25B1F168B74B0009CA089 /* RFViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RFViewController.m; sourceTree = "<group>"; };
-		02E25B22168B74B0009CA089 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/RFViewController.xib; sourceTree = "<group>"; };
+		36E3D7FC1C17763000B5F93B /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,7 +91,7 @@
 				02E25B16168B74B0009CA089 /* RFAppDelegate.m */,
 				02E25B1E168B74B0009CA089 /* RFViewController.h */,
 				02E25B1F168B74B0009CA089 /* RFViewController.m */,
-				02E25B21168B74B0009CA089 /* RFViewController.xib */,
+				36E3D7FC1C17763000B5F93B /* Main.storyboard */,
 				02E25B0D168B74B0009CA089 /* Supporting Files */,
 			);
 			path = QuiltDemo;
@@ -175,8 +175,8 @@
 				02E25B11168B74B0009CA089 /* InfoPlist.strings in Resources */,
 				02E25B19168B74B0009CA089 /* Default.png in Resources */,
 				02E25B1B168B74B0009CA089 /* Default@2x.png in Resources */,
+				36E3D7FD1C17763000B5F93B /* Main.storyboard in Resources */,
 				02E25B1D168B74B0009CA089 /* Default-568h@2x.png in Resources */,
-				02E25B23168B74B0009CA089 /* RFViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -203,14 +203,6 @@
 				02E25B10168B74B0009CA089 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		02E25B21168B74B0009CA089 /* RFViewController.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				02E25B22168B74B0009CA089 /* en */,
-			);
-			name = RFViewController.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
