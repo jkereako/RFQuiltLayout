@@ -8,7 +8,6 @@
 
 #import "RFViewController.h"
 #import "RFViewModel.h"
-#import <QuartzCore/QuartzCore.h>
 
 @interface RFViewController () <UICollectionViewDelegate>
 
@@ -28,14 +27,10 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
 
-  [self.collectionView registerClass:[UICollectionViewCell class]
-          forCellWithReuseIdentifier:@"cell"];
-
-  RFQuiltLayout* layout = (id)[self.collectionView collectionViewLayout];
+  // Fetch the collection view layout and set the properties
+  RFQuiltLayout *layout = (RFQuiltLayout *)self.collectionView.collectionViewLayout;
   layout.direction = UICollectionViewScrollDirectionVertical;
-  layout.blockPixels = CGSizeMake(75,75);
-
-  [self.collectionView reloadData];
+  layout.cellSize = CGSizeMake(75, 75);
 }
 
 - (void) viewDidAppear:(BOOL)animated {

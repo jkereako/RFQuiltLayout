@@ -10,7 +10,7 @@
 @interface RFQuiltLayout ()
 
 @property(nonatomic) CGPoint firstOpenSpace;
-@property(nonatomic) CGPoint furthestBlockPoint;
+@property(nonatomic) CGPoint furthestBlockCoordinate;
 
 // this will be a 2x2 dictionary storing nsindexpaths
 // which indicate the available/filled spaces in our quilt
@@ -30,18 +30,21 @@
 // relayout the same indexpaths while scrolling
 @property(nonatomic) NSIndexPath *indexPathCache;
 
+@property(nonatomic, readonly) NSUInteger restrictedDimensionBlockSize;
+
 - (void)initialize;
-- (void)fillInBlocksToIndexPath:(NSIndexPath *)path;
-- (BOOL)placeBlockAtIndex:(NSIndexPath*)indexPath;
-- (BOOL)traverseTilesBetweenUnrestrictedDimension:(NSUInteger)start and:(NSUInteger)end
+- (void)fillInBlocksToIndexPath:(NSIndexPath *)indexPath;
+- (BOOL)insertCellAtIndexPath:(NSIndexPath *)indexPath;
+- (BOOL)traverseCellsBetweenUnrestrictedDimension:(NSUInteger)start and:(NSUInteger)end
                                          iterator:(BOOL(^)(CGPoint))block;
-- (BOOL)traverseTilesForPoint:(CGPoint)point withSize:(CGSize)size iterator:(BOOL(^)(CGPoint))block;
+- (BOOL)traverseCellsForCoordinate:(CGPoint)point withSize:(CGSize)size iterator:(BOOL(^)(CGPoint))block;
+- (BOOL)traverseOpenCells:(BOOL(^)(CGPoint))block;
 - (void)clearPositions;
-- (NSIndexPath *)indexPathForPosition:(CGPoint)point;
+- (NSIndexPath *)indexPathForCoordinate:(CGPoint)coordinate;
 - (CGPoint)coordinateForIndexPath:(NSIndexPath *)path;
 - (void)setCoordinate:(CGPoint)point forIndexPath:(NSIndexPath *)indexPath;
 - (void)fillInBlocksToUnrestrictedRow:(NSUInteger)endRow;
-- (CGSize)getBlockSizeForItemAtIndexPath:(NSIndexPath *)indexPath;
+- (CGSize)sizeForCellAtIndexPath:(NSIndexPath *)indexPath;
 - (CGRect)rectForIndexPath:(NSIndexPath *)path;
 
 @end
@@ -71,7 +74,7 @@
 - (void)initialize {
   // defaults
   self.direction = UICollectionViewScrollDirectionVertical;
-  self.blockPixels = CGSizeMake(100.f, 100.f);
+  self.cellSize = CGSizeMake(100.f, 100.f);
 }
 
 #pragma mark - Overridden methods
@@ -82,10 +85,10 @@
   switch (self.direction) {
     case UICollectionViewScrollDirectionVertical:
       return CGSizeMake(CGRectGetWidth(contentRect),
-                        (self.furthestBlockPoint.y + 1) * self.blockPixels.height);
+                        (self.furthestBlockCoordinate.y + 1) * self.cellSize.height);
 
     case UICollectionViewScrollDirectionHorizontal:
-      return CGSizeMake((self.furthestBlockPoint.x + 1) * self.blockPixels.width,
+      return CGSizeMake((self.furthestBlockCoordinate.x + 1) * self.cellSize.width,
                         CGRectGetHeight(contentRect));
   }
 }
@@ -95,11 +98,12 @@
     @throw([NSException exceptionWithName:@"NotFound" reason:@"Delegate not set" userInfo:nil]);
   }
 
-  // see the comment on these properties
+  // Check if the supplied rect is identical to the cached rect
   if(CGRectEqualToRect(rect, self.layoutRectCache)) {
     return self.layoutAttributesCache;
   }
 
+  // Cache the rect
   self.layoutRectCache = rect;
 
   NSUInteger unrestrictedDimensionStart = 0;
@@ -107,13 +111,13 @@
 
   switch (self.direction) {
     case UICollectionViewScrollDirectionVertical:
-      unrestrictedDimensionStart = (NSUInteger)(rect.origin.y / self.blockPixels.height);
-      unrestrictedDimensionLength = (NSUInteger)(rect.size.height / self.blockPixels.height);
+      unrestrictedDimensionStart = (NSUInteger)(rect.origin.y / self.cellSize.height);
+      unrestrictedDimensionLength = (NSUInteger)(rect.size.height / self.cellSize.height);
       break;
 
     default:
-      unrestrictedDimensionStart = (NSUInteger)(rect.origin.x / self.blockPixels.width);
-      unrestrictedDimensionLength = (NSUInteger)((rect.size.width / self.blockPixels.width) + 1);
+      unrestrictedDimensionStart = (NSUInteger)(rect.origin.x / self.cellSize.width);
+      unrestrictedDimensionLength = (NSUInteger)((rect.size.width / self.cellSize.width) + 1);
       break;
   }
 
@@ -122,11 +126,11 @@
   [self fillInBlocksToUnrestrictedRow:self.prelayoutEverything ? INT_MAX : unrestrictedDimensionEnd];
 
   // find the indexPaths between those rows
-  NSMutableSet* attributes = [NSMutableSet set];
-  [self traverseTilesBetweenUnrestrictedDimension:unrestrictedDimensionStart
+  NSMutableSet *attributes = [NSMutableSet set];
+  [self traverseCellsBetweenUnrestrictedDimension:unrestrictedDimensionStart
                                               and:unrestrictedDimensionEnd
                                          iterator:^(CGPoint point) {
-                                           NSIndexPath* indexPath = [self indexPathForPosition:point];
+                                           NSIndexPath* indexPath = [self indexPathForCoordinate:point];
 
                                            if(indexPath) {
                                              [attributes addObject:[self layoutAttributesForItemAtIndexPath:indexPath]];
@@ -135,6 +139,7 @@
                                            return YES;
                                          }];
 
+  // Cache the layout attributes
   return (self.layoutAttributesCache = [attributes allObjects]);
 }
 
@@ -178,7 +183,7 @@
 - (void)invalidateLayout {
   [super invalidateLayout];
 
-  _furthestBlockPoint = CGPointZero;
+  _furthestBlockCoordinate = CGPointZero;
   self.firstOpenSpace = CGPointZero;
   self.layoutRectCache = CGRectZero;
   self.layoutAttributesCache = nil;
@@ -201,11 +206,11 @@
                                   self.collectionView.frame.size.height);
   switch (self.direction) {
     case UICollectionViewScrollDirectionVertical:
-      unrestrictedRow = (NSUInteger)(CGRectGetMaxY(scrollFrame) / [self blockPixels].height) + 1;
+      unrestrictedRow = (NSUInteger)(CGRectGetMaxY(scrollFrame) / self.cellSize.height) + 1;
       break;
 
     case UICollectionViewScrollDirectionHorizontal:
-      unrestrictedRow = (NSUInteger)(CGRectGetMaxY(scrollFrame) / [self blockPixels].width) + 1;
+      unrestrictedRow = (NSUInteger)(CGRectGetMaxY(scrollFrame) / self.cellSize.width) + 1;
       break;
   }
 
@@ -220,15 +225,15 @@
 }
 
 - (void)setBlockPixels:(CGSize)size {
-  _blockPixels = size;
+  _cellSize = size;
 
   [self invalidateLayout];
 }
 
-- (void) setFurthestBlockPoint:(CGPoint)point {
-  _furthestBlockPoint = CGPointMake(MAX(self.furthestBlockPoint.x, point.x),
-                                    MAX(self.furthestBlockPoint.y, point.y)
-                                    );
+- (void) setFurthestBlockCoordinate:(CGPoint)point {
+  _furthestBlockCoordinate = CGPointMake(MAX(_furthestBlockCoordinate.x, point.x),
+                                         MAX(_furthestBlockCoordinate.y, point.y)
+                                         );
 }
 
 #pragma mark - Private methods
@@ -242,10 +247,10 @@
   for (NSInteger section = self.indexPathCache.section; section < numSections; section++) {
     NSInteger numRows = [self.collectionView numberOfItemsInSection:section];
 
-    for (NSInteger row = (!self.indexPathCache? 0 : self.indexPathCache.row + 1); row < numRows; row++) {
+    for (NSInteger row = (!self.indexPathCache ? 0 : self.indexPathCache.row + 1); row < numRows; row++) {
       NSIndexPath* indexPath = [NSIndexPath indexPathForRow:row inSection:section];
 
-      if([self placeBlockAtIndex:indexPath]) {
+      if([self insertCellAtIndexPath:indexPath]) {
         self.indexPathCache = indexPath;
       }
 
@@ -267,51 +272,55 @@
   }
 }
 
-- (void)fillInBlocksToIndexPath:(NSIndexPath *)path {
+- (void)fillInBlocksToIndexPath:(NSIndexPath *)indexPath {
 
   // we'll have our data structure as if we're planning
   // a vertical layout, then when we assign positions to
   // the items we'll invert the axis
 
-  NSInteger numSections = [self.collectionView numberOfSections];
-  for (NSInteger section=self.indexPathCache.section; section<numSections; section++) {
-    NSInteger numRows = [self.collectionView numberOfItemsInSection:section];
+  NSInteger sectionCount = [self.collectionView numberOfSections];
 
-    for (NSInteger row = (!self.indexPathCache ? 0 : self.indexPathCache.row + 1); row < numRows; row++) {
+  // Iterate over the sections
+  for (NSInteger section = self.indexPathCache.section; section < sectionCount; section++) {
+    NSInteger rowCount = [self.collectionView numberOfItemsInSection:section];
+
+    // Iterate over the rows
+    for (NSInteger row = (!self.indexPathCache ? 0 : self.indexPathCache.row + 1); row < rowCount; row++) {
 
       // exit when we are past the desired row
-      if(section >= path.section && row > path.row) {
+      if(section >= indexPath.section && row > indexPath.row) {
         return;
       }
 
-      NSIndexPath* indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+      NSIndexPath *newCellIndexPath = [NSIndexPath indexPathForRow:row inSection:section];
 
-      if([self placeBlockAtIndex:indexPath]) {
-        self.indexPathCache = indexPath;
+      if([self insertCellAtIndexPath:newCellIndexPath]) {
+        // Cache the index path
+        self.indexPathCache = newCellIndexPath;
       }
 
     }
   }
 }
 
-- (BOOL)placeBlockAtIndex:(NSIndexPath*)indexPath {
-  CGSize blockSize = [self getBlockSizeForItemAtIndexPath:indexPath];
+- (BOOL)insertCellAtIndexPath:(NSIndexPath *)indexPath {
+  CGSize cellSize = [self sizeForCellAtIndexPath:indexPath];
   BOOL vert = self.direction == UICollectionViewScrollDirectionVertical;
 
-  return ![self traverseOpenTiles:^(CGPoint blockOrigin) {
+  return ![self traverseOpenCells:^(CGPoint blockOrigin) {
 
     // we need to make sure each square in the desired
     // area is available before we can place the square
 
-    BOOL didTraverseAllBlocks = [self traverseTilesForPoint:blockOrigin
-                                                   withSize:blockSize
+    BOOL didTraverseAllBlocks = [self traverseCellsForCoordinate:blockOrigin
+                                                   withSize:cellSize
                                                    iterator:^(CGPoint point) {
-                                                     BOOL spaceAvailable = (BOOL)![self indexPathForPosition:point];
-                                                     BOOL inBounds = (vert? point.x : point.y) < [self restrictedDimensionBlockSize];
+                                                     BOOL spaceAvailable = (BOOL)![self indexPathForCoordinate:point];
+                                                     BOOL inBounds = (vert? point.x : point.y) < self.restrictedDimensionBlockSize;
                                                      BOOL maximumRestrictedBoundSize = (vert? blockOrigin.x : blockOrigin.y) == 0;
 
                                                      if (spaceAvailable && maximumRestrictedBoundSize && !inBounds) {
-                                                       NSLog(@"%@: layout is not %@ enough for this piece size: %@! Adding anyway...", [self class], vert? @"wide" : @"tall", NSStringFromCGSize(blockSize));
+                                                       NSLog(@"%@: layout is not %@ enough for this piece size: %@! Adding anyway...", [self class], vert? @"wide" : @"tall", NSStringFromCGSize(cellSize));
                                                        return YES;
                                                      }
 
@@ -328,12 +337,12 @@
 
     [self setIndexPath:indexPath forPosition:blockOrigin];
 
-    [self traverseTilesForPoint:blockOrigin
-                       withSize:blockSize
+    [self traverseCellsForCoordinate:blockOrigin
+                       withSize:cellSize
                        iterator:^(CGPoint point) {
                          [self setCoordinate:point forIndexPath:indexPath];
 
-                         self.furthestBlockPoint = point;
+                         self.furthestBlockCoordinate = point;
 
                          return YES;
                        }];
@@ -344,12 +353,12 @@
 
 // returning no in the callback will
 // terminate the iterations early
-- (BOOL)traverseTilesBetweenUnrestrictedDimension:(NSUInteger)start and:(NSUInteger)end
+- (BOOL)traverseCellsBetweenUnrestrictedDimension:(NSUInteger)start and:(NSUInteger)end
                                          iterator:(BOOL(^)(CGPoint))block {
 
   // the double ;; is deliberate, the unrestricted dimension should iterate indefinitely
   for(NSUInteger unrestrictedDimension = start; unrestrictedDimension < end; unrestrictedDimension ++) {
-    for(NSUInteger restrictedDimension = 0; restrictedDimension < [self restrictedDimensionBlockSize]; restrictedDimension++) {
+    for(NSUInteger restrictedDimension = 0; restrictedDimension < self.restrictedDimensionBlockSize; restrictedDimension++) {
 
       CGPoint point = CGPointZero;
 
@@ -372,14 +381,14 @@
   return YES;
 }
 
-// returning no in the callback will
-// terminate the iterations early
-- (BOOL)traverseTilesForPoint:(CGPoint)point withSize:(CGSize)size iterator:(BOOL(^)(CGPoint))block {
-
-  for(NSUInteger col = (NSUInteger)point.x; col < point.x + size.width; col++) {
+- (BOOL)traverseCellsForCoordinate:(CGPoint)point
+                          withSize:(CGSize)size
+                          iterator:(BOOL(^)(CGPoint))block {
+  for(NSUInteger column = (NSUInteger)point.x; column < point.x + size.width; column++) {
     for (NSUInteger row = (NSUInteger)point.y; row < point.y + size.height; row++) {
 
-      if(!block(CGPointMake(col, row))) {
+      if(!block(CGPointMake(column, row))) {
+        // Terminate iteration
         return NO;
       }
     }
@@ -389,13 +398,13 @@
 
 // returning no in the callback will
 // terminate the iterations early
-- (BOOL)traverseOpenTiles:(BOOL(^)(CGPoint))block {
+- (BOOL)traverseOpenCells:(BOOL(^)(CGPoint))block {
   BOOL allTakenBefore = YES;
   BOOL isVert = self.direction == UICollectionViewScrollDirectionVertical;
 
   // the double ;; is deliberate, the unrestricted dimension should iterate indefinitely
   for(NSUInteger unrestrictedDimension = (isVert? self.firstOpenSpace.y : self.firstOpenSpace.x);; unrestrictedDimension++) {
-    for(int restrictedDimension = 0; restrictedDimension<[self restrictedDimensionBlockSize]; restrictedDimension++) {
+    for(int restrictedDimension = 0; restrictedDimension < self.restrictedDimensionBlockSize; restrictedDimension++) {
 
       CGPoint point = CGPointZero;
 
@@ -409,7 +418,7 @@
           break;
       }
 
-      if([self indexPathForPosition:point]) {
+      if([self indexPathForCoordinate:point]) {
         continue;
       }
 
@@ -433,18 +442,18 @@
   self.positionByIndexPath = [NSMutableDictionary dictionary];
 }
 
-- (NSIndexPath*)indexPathForPosition:(CGPoint)point {
+- (NSIndexPath*)indexPathForCoordinate:(CGPoint)coordinate {
   NSNumber *unrestrictedPoint, *restrictedPoint;
 
   switch (self.direction) {
     case UICollectionViewScrollDirectionVertical:
-      unrestrictedPoint = @(point.y);
-      restrictedPoint = @(point.x);
+      unrestrictedPoint = @(coordinate.y);
+      restrictedPoint = @(coordinate.x);
       break;
 
     case UICollectionViewScrollDirectionHorizontal:
-      unrestrictedPoint = @(point.x);
-      restrictedPoint = @(point.y);
+      unrestrictedPoint = @(coordinate.x);
+      restrictedPoint = @(coordinate.y);
       break;
   }
 
@@ -504,27 +513,28 @@
 
 - (CGRect)rectForIndexPath:(NSIndexPath *)path {
   CGPoint position = [self coordinateForIndexPath:path];
-  CGSize elementSize = [self getBlockSizeForItemAtIndexPath:path];
+  CGSize elementSize = [self sizeForCellAtIndexPath:path];
   CGFloat initialPaddingForContraintedDimension = 0.0;
   CGRect contentRect = UIEdgeInsetsInsetRect(self.collectionView.frame,
                                              self.collectionView.contentInset);
+
   switch (self.direction) {
     case UICollectionViewScrollDirectionVertical: {
 
-      initialPaddingForContraintedDimension = (CGRectGetWidth(contentRect) - [self restrictedDimensionBlockSize] * self.blockPixels.width) / 2;
-      return CGRectMake(position.x * self.blockPixels.width + initialPaddingForContraintedDimension,
-                        position.y * self.blockPixels.height,
-                        elementSize.width * self.blockPixels.width,
-                        elementSize.height * self.blockPixels.height);
+      initialPaddingForContraintedDimension = (CGRectGetWidth(contentRect) - self.restrictedDimensionBlockSize * self.cellSize.width) / 2;
+      return CGRectMake(position.x * self.cellSize.width + initialPaddingForContraintedDimension,
+                        position.y * self.cellSize.height,
+                        elementSize.width * self.cellSize.width,
+                        elementSize.height * self.cellSize.height);
 
     }
 
     case UICollectionViewScrollDirectionHorizontal: {
-      initialPaddingForContraintedDimension = (CGRectGetHeight(contentRect) - [self restrictedDimensionBlockSize] * self.blockPixels.height) / 2;
-      return CGRectMake(position.x * self.blockPixels.width,
-                        position.y * self.blockPixels.height + initialPaddingForContraintedDimension,
-                        elementSize.width * self.blockPixels.width,
-                        elementSize.height * self.blockPixels.height);
+      initialPaddingForContraintedDimension = (CGRectGetHeight(contentRect) - self.restrictedDimensionBlockSize * self.cellSize.height) / 2;
+      return CGRectMake(position.x * self.cellSize.width,
+                        position.y * self.cellSize.height + initialPaddingForContraintedDimension,
+                        elementSize.width * self.cellSize.width,
+                        elementSize.height * self.cellSize.height);
 
     }
   }
@@ -532,7 +542,7 @@
 
 
 //This method is prefixed with get because it may return its value indirectly
-- (CGSize)getBlockSizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+- (CGSize)sizeForCellAtIndexPath:(NSIndexPath *)indexPath {
   CGSize blockSize = CGSizeMake(1, 1);
 
   if([self.delegate
@@ -558,15 +568,15 @@
   
   switch (self.direction) {
     case UICollectionViewScrollDirectionVertical:
-      size = (NSUInteger)(CGRectGetWidth(contentRect) / self.blockPixels.width);
+      size = (NSUInteger)(CGRectGetWidth(contentRect) / self.cellSize.width);
       break;
       
     case UICollectionViewScrollDirectionHorizontal:
-      size = (NSUInteger)(CGRectGetHeight(contentRect) / self.blockPixels.height);
+      size = (NSUInteger)(CGRectGetHeight(contentRect) / self.cellSize.height);
   }
   
   if(size == 0) {
-    NSLog(@"Cannot fit block of size: %@ in content rect %@!  Defaulting to 1", NSStringFromCGSize(self.blockPixels), NSStringFromCGRect(contentRect));
+    NSLog(@"Cannot fit block of size: %@ in content rect %@!  Defaulting to 1", NSStringFromCGSize(self.cellSize), NSStringFromCGRect(contentRect));
     return 1;
   }
   

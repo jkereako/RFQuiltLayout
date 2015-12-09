@@ -20,7 +20,7 @@
 
 @property (nonatomic, weak) IBOutlet NSObject<RFQuiltLayoutDelegate>* delegate;
 
-@property (nonatomic) CGSize blockPixels; // defaults to 100x100
+@property (nonatomic) CGSize cellSize; // defaults to 100x100
 @property (nonatomic) UICollectionViewScrollDirection direction; // defaults to vertical
 
 // only use this if you don't have more than 1000ish items.
