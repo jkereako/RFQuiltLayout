@@ -5,16 +5,19 @@
 //  Copyright (c) 2012. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-
+@import UIKit;
 
 @protocol RFQuiltLayoutDelegate <UICollectionViewDelegate>
+
 @optional
+
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout blockSizeForItemAtIndexPath:(NSIndexPath *)indexPath; // defaults to 1x1
 - (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetsForItemAtIndexPath:(NSIndexPath *)indexPath; // defaults to uiedgeinsetszero
+
 @end
 
 @interface RFQuiltLayout : UICollectionViewLayout
+
 @property (nonatomic, weak) IBOutlet NSObject<RFQuiltLayoutDelegate>* delegate;
 
 @property (nonatomic) CGSize blockPixels; // defaults to 100x100
