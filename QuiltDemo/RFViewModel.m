@@ -7,9 +7,12 @@
 //
 
 #import "RFViewModel.h"
-#import "RFViewController.h"
 
 @interface RFViewModel ()
+
+@property (nonatomic) NSMutableArray* numbers;
+@property (nonatomic) NSMutableArray* numberWidths;
+@property (nonatomic) NSMutableArray* numberHeights;
 
 - (UIColor *)colorForNumber:(NSNumber *)number;
 - (NSUInteger)randomLength;

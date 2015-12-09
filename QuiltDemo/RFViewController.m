@@ -70,8 +70,7 @@
 }
 
 - (IBAction)remove:(UIBarButtonItem * __unused)sender {
-
-  if (!self.viewModel.numbers.count || self.isAnimating) {
+  if (self.isAnimating) {
     return;
   }
 
