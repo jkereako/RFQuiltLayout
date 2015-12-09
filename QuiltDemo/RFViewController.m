@@ -113,7 +113,4 @@ didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
                  }];
 }
 
-#pragma mark - Helper methods
-
-
 @end

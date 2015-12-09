@@ -1,3 +1,7 @@
+# Changes
+This is a cleaned-up version of RFQuiltLayout. I'm doing this to prepare for a
+Swift version of this project.
+
 RFQUILTLAYOUT
 =============
 
