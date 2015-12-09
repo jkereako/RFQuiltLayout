@@ -5,7 +5,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
     </dependencies>
     <scenes>
-        <!--Delegate-->
+        <!--View Controller-->
         <scene sceneID="I0w-u3-f4D">
             <objects>
                 <viewController id="VLT-BH-97Q" customClass="RFViewController" sceneMemberID="viewController">
@@ -41,11 +41,11 @@
                                 <rect key="frame" x="0.0" y="64" width="600" height="536"/>
                                 <collectionViewLayout key="collectionViewLayout" id="koK-fH-MNP" customClass="RFQuiltLayout">
                                     <connections>
-                                        <outlet property="delegate" destination="VLT-BH-97Q" id="8In-Kn-0Ws"/>
+                                        <outlet property="delegate" destination="vAq-yI-4O5" id="AiI-Wm-Er7"/>
                                     </connections>
                                 </collectionViewLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="QE3-Jf-1XH">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="cell" id="QE3-Jf-1XH">
                                         <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -56,8 +56,8 @@
                                     </collectionViewCell>
                                 </cells>
                                 <connections>
-                                    <outlet property="dataSource" destination="VLT-BH-97Q" id="e9d-GQ-QAi"/>
-                                    <outlet property="delegate" destination="VLT-BH-97Q" id="E85-LR-sVP"/>
+                                    <outlet property="dataSource" destination="vAq-yI-4O5" id="VP0-wb-5Tb"/>
+                                    <outlet property="delegate" destination="VLT-BH-97Q" id="we5-T6-phq"/>
                                 </connections>
                             </collectionView>
                         </subviews>
@@ -74,9 +74,11 @@
                     </view>
                     <connections>
                         <outlet property="collectionView" destination="Rrf-90-B66" id="dqC-Ty-elf"/>
+                        <outlet property="viewModel" destination="vAq-yI-4O5" id="lr9-Ft-1pu"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HNW-LW-10z" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <customObject id="vAq-yI-4O5" customClass="RFViewModel"/>
             </objects>
             <point key="canvasLocation" x="825" y="121"/>
         </scene>

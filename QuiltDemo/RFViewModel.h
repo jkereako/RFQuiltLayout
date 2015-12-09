@@ -11,9 +11,12 @@
 
 @class RFViewController;
 
-@interface RFViewModel : NSObject <RFQuiltLayoutDelegate>
+@interface RFViewModel : NSObject <UICollectionViewDataSource, RFQuiltLayoutDelegate>
 
-@property (nonatomic) RFViewController *viewController;
-@property (nonatomic, readonly) NSArray *numbers;
+@property (nonatomic) NSMutableArray* numbers;
+@property (nonatomic) NSMutableArray* numberWidths;
+@property (nonatomic) NSMutableArray* numberHeights;
+
+- (void)refreshData;
 
 @end

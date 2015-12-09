@@ -10,25 +10,26 @@
 #import "RFViewModel.h"
 #import <QuartzCore/QuartzCore.h>
 
-@interface RFViewController () <UICollectionViewDelegate> {
-  BOOL isAnimating;
-}
+@interface RFViewController () <UICollectionViewDelegate>
 
-@property (nonatomic) RFViewModel *viewModel;
-@property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
+@property (nonatomic, readwrite, weak) IBOutlet RFViewModel *viewModel;
+@property (nonatomic, readwrite, weak) IBOutlet UICollectionView *collectionView;
+
+@property (nonatomic, readwrite, getter=isAnimating) BOOL animating;
+
+- (IBAction)add:(UIBarButtonItem *)sender;
+- (IBAction)remove:(UIBarButtonItem *)sender;
+- (IBAction)refresh:(UIBarButtonItem *)sender;
 
 @end
-
-int num = 0;
 
 @implementation RFViewController
 
 - (void)viewDidLoad {
   [super viewDidLoad];
 
-  self.viewModel = [RFViewModel new];
-
-  [self.collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
+  [self.collectionView registerClass:[UICollectionViewCell class]
+          forCellWithReuseIdentifier:@"cell"];
 
   RFQuiltLayout* layout = (id)[self.collectionView collectionViewLayout];
   layout.direction = UICollectionViewScrollDirectionVertical;
@@ -39,11 +40,25 @@ int num = 0;
 
 - (void) viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  
+
   [self.collectionView reloadData];
 }
 
-- (IBAction)remove:(id)sender {
+#pragma mark - Actions
+- (IBAction)add:(UIBarButtonItem *)sender {
+  NSArray *visibleIndexPaths = [self.collectionView indexPathsForVisibleItems];
+
+  if (!visibleIndexPaths.count) {
+    [self addIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+
+    return;
+  }
+
+  [self addIndexPath:visibleIndexPaths[0]];
+
+}
+
+- (IBAction)remove:(UIBarButtonItem *)sender {
 
   if (!self.viewModel.numbers.count) {
     return;
@@ -51,75 +66,78 @@ int num = 0;
 
   NSArray *visibleIndexPaths = [self.collectionView indexPathsForVisibleItems];
   NSIndexPath *toRemove = [visibleIndexPaths objectAtIndex:(arc4random() % visibleIndexPaths.count)];
+
   [self removeIndexPath:toRemove];
 }
 
-- (IBAction)refresh:(id)sender {
-  self.viewModel = nil;
-  self.viewModel = [RFViewModel new];
-
+- (IBAction)refresh:(UIBarButtonItem *)sender {
+  [self.viewModel refreshData];
   [self.collectionView reloadData];
 }
 
-- (IBAction)add:(id)sender {
-  NSArray *visibleIndexPaths = [self.collectionView indexPathsForVisibleItems];
-  if (visibleIndexPaths.count == 0) {
-    [self addIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
-    return;
-  }
-  NSUInteger middle = (NSUInteger)floor(visibleIndexPaths.count / 2);
-  NSIndexPath *toAdd = [visibleIndexPaths firstObject];[visibleIndexPaths objectAtIndex:middle];
-  [self addIndexPath:toAdd];
-
-}
-
 #pragma mark - UICollectionView Delegate
-
-- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
-{
+- (void)collectionView:(UICollectionView *)collectionView
+didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
   [self removeIndexPath:indexPath];
 }
 
 #pragma mark - Helper methods
-
 - (void)addIndexPath:(NSIndexPath *)indexPath {
   if (indexPath.row > self.viewModel.numbers.count) {
     return;
   }
 
-  if(isAnimating) return;
-  isAnimating = YES;
+  if(self.isAnimating) {
+    return;
+  }
 
-  RFViewController __weak * weakSelf = self;
-  [self.collectionView performBatchUpdates:^{
+  self.animating = YES;
+  RFViewController * __weak weakSelf = self;
+
+  [self.collectionView performBatchUpdates:^(void) {
     NSInteger index = indexPath.row;
-    [weakSelf.numbers insertObject:@(++num) atIndex: (NSUInteger)index];
-    [weakSelf.numberWidths insertObject:@(1 + arc4random() % 3) atIndex: (NSUInteger)index];
-    [weakSelf.numberHeights insertObject:@(1 + arc4random() % 3) atIndex: (NSUInteger)index];
-    [weakSelf.collectionView insertItemsAtIndexPaths:@[[NSIndexPath
-                                                        indexPathForRow: (NSInteger)index
-                                                        inSection:0]]];
-  } completion:^(BOOL done) {
-    isAnimating = NO;
-  }];
+
+    [weakSelf.viewModel.numbers insertObject:@(weakSelf.viewModel.numbers.count + 1)
+                                     atIndex: (NSUInteger)index];
+
+    [weakSelf.viewModel.numberWidths insertObject:@(1 + arc4random() % 3)
+                                          atIndex: (NSUInteger)index];
+
+    [weakSelf.viewModel.numberHeights insertObject:@(1 + arc4random() % 3)
+                                           atIndex: (NSUInteger)index];
+
+    [weakSelf.collectionView
+     insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow: (NSInteger)index inSection: 0]]
+     ];
+  }
+                                completion:^(BOOL done) {
+                                  self.animating = NO;
+                                }
+   ];
 }
 
 - (void)removeIndexPath:(NSIndexPath *)indexPath {
-  if(!self.numbers.count || indexPath.row > self.numbers.count) return;
+  if(!self.viewModel.numbers.count ||
+     indexPath.row > self.viewModel.numbers.count ||
+     self.isAnimating) {
+    return;
+  }
 
-  if(isAnimating) return;
-  isAnimating = YES;
+  self.animating = YES;
+  RFViewController * __weak weakSelf = self;
 
-  RFViewController __weak * weakSelf = self;
   [self.collectionView performBatchUpdates:^{
     NSInteger index = indexPath.row;
-    [weakSelf.numbers removeObjectAtIndex:(NSUInteger)index];
-    [weakSelf.numberWidths removeObjectAtIndex: (NSUInteger)index];
-    [weakSelf.numberHeights removeObjectAtIndex: (NSUInteger)index];
-    [weakSelf.collectionView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForRow: (NSInteger)index inSection:0]]];
-  } completion:^(BOOL done) {
-    isAnimating = NO;
-  }];
+    [weakSelf.viewModel.numbers removeObjectAtIndex:(NSUInteger)index];
+    [weakSelf.viewModel.numberWidths removeObjectAtIndex:(NSUInteger)index];
+    [weakSelf.viewModel.numberHeights removeObjectAtIndex:(NSUInteger)index];
+    [weakSelf.collectionView
+     deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:(NSInteger)index inSection:0]]
+     ];
+  }
+                                completion:^(BOOL done) {
+                                  weakSelf.animating = NO;
+                                }];
 }
 
 @end

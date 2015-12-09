@@ -9,11 +9,7 @@
 #import "RFViewModel.h"
 #import "RFViewController.h"
 
-@interface RFViewModel () <UICollectionViewDataSource>
-
-@property (nonatomic, readwrite) NSArray* numbers;
-@property (nonatomic, readwrite) NSArray* numberWidths;
-@property (nonatomic, readwrite) NSArray* numberHeights;
+@interface RFViewModel ()
 
 - (UIColor *)colorForNumber:(NSNumber *)number;
 - (NSUInteger)randomLength;
@@ -26,36 +22,46 @@
   self = [super init];
 
   if (self) {
-    NSMutableArray *someNumbers = [@[] mutableCopy];
-    NSMutableArray *someNumberWidths = @[].mutableCopy;
-    NSMutableArray *someNumberHeights = @[].mutableCopy;
-
-    for(NSUInteger i = 0; i < 15; i ++) {
-      [someNumbers addObject:@(i)];
-      [someNumberWidths addObject:@([self randomLength])];
-      [someNumberHeights addObject:@([self randomLength])];
-    }
-    
-    self.numbers = someNumbers;
-    self.numberWidths = someNumberWidths;
-    self.numberHeights = someNumberHeights;
+    [self refreshData];
   }
 
   return self;
 }
 
-#pragma mark - Collection view data source
+- (void)refreshData {
+  NSMutableArray *someNumbers = [@[] mutableCopy];
+  NSMutableArray *someNumberWidths = @[].mutableCopy;
+  NSMutableArray *someNumberHeights = @[].mutableCopy;
 
+  for(NSUInteger i = 0; i < 15; i ++) {
+    [someNumbers addObject:@(i)];
+    [someNumberWidths addObject:@([self randomLength])];
+    [someNumberHeights addObject:@([self randomLength])];
+  }
+
+  self.numbers = someNumbers;
+  self.numberWidths = someNumberWidths;
+  self.numberHeights = someNumberHeights;
+
+}
+
+#pragma mark - Collection view data source
 - (NSInteger)collectionView:(UICollectionView *)view numberOfItemsInSection:(NSInteger)section {
   return (NSInteger)self.numbers.count;
 }
 
-- (UICollectionViewCell *)collectionView:(UICollectionView *)cv cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-  UICollectionViewCell *cell = [cv dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
+- (UICollectionViewCell *)collectionView:(UICollectionView *)cv
+                  cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+  UICollectionViewCell *cell = [cv dequeueReusableCellWithReuseIdentifier:@"cell"
+                                                             forIndexPath:indexPath];
   cell.backgroundColor = [self colorForNumber: self.numbers[(NSUInteger)indexPath.row]];
 
   UILabel* label = (id)[cell viewWithTag:5];
-  if(!label) label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 30, 20)];
+
+  if(!label) {
+    label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 30, 20)];
+  }
+
   label.tag = 5;
   label.textColor = [UIColor blackColor];
   label.text = [NSString stringWithFormat:@"%@", self.numbers[(NSUInteger)indexPath.row]];
@@ -68,7 +74,7 @@
 #pragma mark – RFQuiltLayoutDelegate
 
 -(CGSize) collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout blockSizeForItemAtIndexPath:(NSIndexPath *)indexPath{
-  
+
   if(indexPath.row >= self.numbers.count) {
     NSLog(@"Asking for index paths of non-existant cells!! %ld from %lu cells", (long)indexPath.row, (unsigned long)self.numbers.count);
   }
