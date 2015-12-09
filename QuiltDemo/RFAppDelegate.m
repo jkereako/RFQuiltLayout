@@ -8,8 +8,6 @@
 
 #import "RFAppDelegate.h"
 
-#import "RFViewController.h"
-
 @implementation RFAppDelegate
 
 - (BOOL)application:(UIApplication *  __unused)application

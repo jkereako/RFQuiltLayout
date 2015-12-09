@@ -7,8 +7,7 @@
 //
 
 @import UIKit;
-#import "RFQuiltLayout.h"
 #import "RFViewModel.h"
-@interface RFViewController : UIViewController<RFCollectionViewControllerDelegate>
 
+@interface RFViewController : UIViewController<RFCollectionViewControllerDelegate>
 @end

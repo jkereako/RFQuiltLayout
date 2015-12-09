@@ -8,8 +8,6 @@
 
 @import UIKit;
 
-@class RFViewController;
-
 @interface RFAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (nonatomic) UIWindow *window;

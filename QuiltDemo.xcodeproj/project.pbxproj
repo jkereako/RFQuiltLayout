@@ -8,12 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0239B55C168BB0F4008B8AD6 /* RFQuiltLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 0239B55B168BB0F4008B8AD6 /* RFQuiltLayout.m */; };
-		02E25B11168B74B0009CA089 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 02E25B0F168B74B0009CA089 /* InfoPlist.strings */; };
 		02E25B13168B74B0009CA089 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 02E25B12168B74B0009CA089 /* main.m */; };
 		02E25B17168B74B0009CA089 /* RFAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 02E25B16168B74B0009CA089 /* RFAppDelegate.m */; };
-		02E25B19168B74B0009CA089 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 02E25B18168B74B0009CA089 /* Default.png */; };
-		02E25B1B168B74B0009CA089 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 02E25B1A168B74B0009CA089 /* Default@2x.png */; };
-		02E25B1D168B74B0009CA089 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 02E25B1C168B74B0009CA089 /* Default-568h@2x.png */; };
 		02E25B20168B74B0009CA089 /* RFViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 02E25B1F168B74B0009CA089 /* RFViewController.m */; };
 		36E3D7FD1C17763000B5F93B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 36E3D7FC1C17763000B5F93B /* Main.storyboard */; settings = {ASSET_TAGS = (); }; };
 		36E3D8001C1784DF00B5F93B /* RFViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 36E3D7FF1C1784DF00B5F93B /* RFViewModel.m */; settings = {ASSET_TAGS = (); }; };
@@ -27,14 +23,10 @@
 		02E25B06168B74B0009CA089 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		02E25B08168B74B0009CA089 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		02E25B0E168B74B0009CA089 /* QuiltDemo-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "QuiltDemo-Info.plist"; sourceTree = "<group>"; };
-		02E25B10168B74B0009CA089 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		02E25B12168B74B0009CA089 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		02E25B14168B74B0009CA089 /* QuiltDemo-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "QuiltDemo-Prefix.pch"; sourceTree = "<group>"; };
 		02E25B15168B74B0009CA089 /* RFAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RFAppDelegate.h; sourceTree = "<group>"; };
 		02E25B16168B74B0009CA089 /* RFAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RFAppDelegate.m; sourceTree = "<group>"; };
-		02E25B18168B74B0009CA089 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
-		02E25B1A168B74B0009CA089 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
-		02E25B1C168B74B0009CA089 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		02E25B1E168B74B0009CA089 /* RFViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RFViewController.h; sourceTree = "<group>"; };
 		02E25B1F168B74B0009CA089 /* RFViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RFViewController.m; sourceTree = "<group>"; };
 		36E3D7FC1C17763000B5F93B /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
@@ -99,13 +91,9 @@
 		02E25B0D168B74B0009CA089 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				02E25B0E168B74B0009CA089 /* QuiltDemo-Info.plist */,
-				02E25B0F168B74B0009CA089 /* InfoPlist.strings */,
 				02E25B12168B74B0009CA089 /* main.m */,
+				02E25B0E168B74B0009CA089 /* QuiltDemo-Info.plist */,
 				02E25B14168B74B0009CA089 /* QuiltDemo-Prefix.pch */,
-				02E25B18168B74B0009CA089 /* Default.png */,
-				02E25B1A168B74B0009CA089 /* Default@2x.png */,
-				02E25B1C168B74B0009CA089 /* Default-568h@2x.png */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -171,11 +159,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				02E25B11168B74B0009CA089 /* InfoPlist.strings in Resources */,
-				02E25B19168B74B0009CA089 /* Default.png in Resources */,
-				02E25B1B168B74B0009CA089 /* Default@2x.png in Resources */,
 				36E3D7FD1C17763000B5F93B /* Main.storyboard in Resources */,
-				02E25B1D168B74B0009CA089 /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,17 +179,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		02E25B0F168B74B0009CA089 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				02E25B10168B74B0009CA089 /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		02E25B24168B74B0009CA089 /* Debug */ = {
