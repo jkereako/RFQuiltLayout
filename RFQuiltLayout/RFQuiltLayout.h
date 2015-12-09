@@ -25,9 +25,8 @@
 @property (nonatomic) CGSize cellSize; // defaults to 100x100
 @property (nonatomic) UICollectionViewScrollDirection direction; // defaults to vertical
 
-// only use this if you don't have more than 1000ish items.
-// this will give you the correct size from the start and
-// improve scrolling speed, at the cost of time at the beginning
-@property (nonatomic) BOOL prelayoutEverything;
+// Set this only if you have fewer than 1,000 items. This provides the correct size from the start
+// and improves scrolling speed at the cost of extra loading time in the beginning.
+@property (nonatomic, getter=shouldPreemptivelyRenderLayout) BOOL preemptivelyRenderLayout;
 
 @end

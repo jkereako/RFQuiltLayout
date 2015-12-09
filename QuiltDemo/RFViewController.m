@@ -90,11 +90,18 @@
 }
 
 - (IBAction)remove:(UIBarButtonItem * __unused)sender {
+  // Exit immediately if we're in the middle of an animation
   if (self.isAnimating) {
     return;
   }
 
   NSArray *visibleIndexPaths = [self.collectionView indexPathsForVisibleItems];
+
+  // Exit if there are no visible cells
+  if (!visibleIndexPaths.count) {
+    return;
+  }
+
   // Select a random index path
   NSIndexPath *indexPath = [visibleIndexPaths objectAtIndex:(arc4random() % visibleIndexPaths.count)];
 
