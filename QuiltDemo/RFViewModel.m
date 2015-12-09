@@ -14,7 +14,6 @@
 @property (nonatomic) NSMutableArray* numberWidths;
 @property (nonatomic) NSMutableArray* numberHeights;
 
-- (UIColor *)colorForNumber:(NSNumber *)number;
 - (NSUInteger)randomLength;
 
 @end
@@ -45,13 +44,12 @@
   self.numbers = someNumbers;
   self.numberWidths = someNumberWidths;
   self.numberHeights = someNumberHeights;
-
 }
 
 - (void)collectionView:(UICollectionView *)cv
           addIndexPath:(NSIndexPath *)indexPath
               completionBlock:(void(^)(void))block {
-
+  // Check for nil
   NSParameterAssert(cv);
   NSParameterAssert(indexPath);
 
@@ -84,6 +82,7 @@
 - (void)collectionView:(UICollectionView *)cv
        removeIndexPath:(NSIndexPath *)indexPath
               completionBlock:(void(^)(void))block {
+  // Check for nil
   NSParameterAssert(cv);
   NSParameterAssert(indexPath);
   
@@ -106,37 +105,32 @@
 }
 
 #pragma mark - Collection view data source
-- (NSInteger)collectionView:(UICollectionView * __unused)view numberOfItemsInSection:(NSInteger __unused)section {
+- (NSInteger)collectionView:(UICollectionView * __unused)view
+     numberOfItemsInSection:(NSInteger __unused)section {
+
   return (NSInteger)self.numbers.count;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)cv
                   cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+
   UICollectionViewCell *cell = [cv dequeueReusableCellWithReuseIdentifier:@"cell"
                                                              forIndexPath:indexPath];
-  cell.backgroundColor = [self colorForNumber: self.numbers[(NSUInteger)indexPath.row]];
 
-  UILabel* label = (id)[cell viewWithTag:5];
-
-  if(!label) {
-    label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 30, 20)];
-  }
-
-  label.tag = 5;
-  label.textColor = [UIColor blackColor];
-  label.text = [NSString stringWithFormat:@"%@", self.numbers[(NSUInteger)indexPath.row]];
-  label.backgroundColor = [UIColor clearColor];
-  [cell addSubview:label];
+  // Delegate the cell configuration to the view controller.
+  [self.delegate configureCell:cell withObject:self.numbers[(NSUInteger)indexPath.row]];
 
   return cell;
 }
 
 #pragma mark – RFQuiltLayoutDelegate
-
--(CGSize) collectionView:(UICollectionView * __unused)collectionView layout:(UICollectionViewLayout * __unused)collectionViewLayout blockSizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+-(CGSize)collectionView:(UICollectionView * __unused)collectionView
+                 layout:(UICollectionViewLayout * __unused)collectionViewLayout
+blockSizeForItemAtIndexPath:(NSIndexPath *)indexPath{
 
   if(indexPath.row >= self.numbers.count) {
-    NSLog(@"Asking for index paths of non-existant cells!! %ld from %lu cells", (long)indexPath.row, (unsigned long)self.numbers.count);
+    NSLog(@"Asking for index paths of non-existant cells!! %ld from %lu cells",
+          (long)indexPath.row, (unsigned long)self.numbers.count);
   }
 
   CGFloat width = [self.numberWidths[(NSUInteger)indexPath.row] floatValue];
@@ -145,16 +139,11 @@
   return CGSizeMake(width, height);
 }
 
-- (UIEdgeInsets)collectionView:(UICollectionView * __unused)collectionView layout:(UICollectionViewLayout * __unused)collectionViewLayout insetsForItemAtIndexPath:(NSIndexPath * __unused)indexPath {
+- (UIEdgeInsets)collectionView:(UICollectionView * __unused)collectionView
+                        layout:(UICollectionViewLayout * __unused)collectionViewLayout
+      insetsForItemAtIndexPath:(NSIndexPath * __unused)indexPath {
+
   return UIEdgeInsetsMake(2, 2, 2, 2);
-}
-
-
-- (UIColor *)colorForNumber:(NSNumber *)number {
-  return [UIColor colorWithHue:((19 * number.intValue) % 255)/255.f
-                    saturation:1.f
-                    brightness:1.f
-                         alpha:1.f];
 }
 
 - (NSUInteger)randomLength {

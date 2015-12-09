@@ -20,6 +20,8 @@
 - (IBAction)remove:(UIBarButtonItem *)sender;
 - (IBAction)refresh:(UIBarButtonItem *)sender;
 
+- (UIColor *)colorForNumber:(NSNumber *)number;
+
 @end
 
 @implementation RFViewController
@@ -31,12 +33,30 @@
   RFQuiltLayout *layout = (RFQuiltLayout *)self.collectionView.collectionViewLayout;
   layout.direction = UICollectionViewScrollDirectionVertical;
   layout.cellSize = CGSizeMake(75, 75);
+
+  // The only delegate method `viewModel` invokes is `configureCell:withObject:`. It is the proper
+  // way to communicate between model and controller.
+  self.viewModel.delegate = self;
 }
 
 - (void) viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
 
   [self.collectionView reloadData];
+}
+
+#pragma mark - RFCollectionViewControllerDelegate
+- (void)configureCell:(UICollectionViewCell *)cell withObject:(id)object {
+  // Check for nil
+  NSParameterAssert(cell);
+  NSParameterAssert(object);
+
+  NSNumber *number = (NSNumber *)object;
+  cell.backgroundColor = [self colorForNumber: number];
+
+  // Fetch the label as defined in the storyboard and assign the `object` to it's `text` property.
+  UILabel* label = (UILabel *)[cell viewWithTag:5];
+  label.text = [NSString stringWithFormat:@"%@", number];
 }
 
 #pragma mark - Actions
@@ -111,6 +131,14 @@ didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
                  completionBlock:^(void){
                    weakSelf.animating = NO;
                  }];
+}
+
+#pragma mark - Helpers
+- (UIColor *)colorForNumber:(NSNumber *)number {
+  return [UIColor colorWithHue:((19 * number.intValue) % 255)/255.f
+                    saturation:1.f
+                    brightness:1.f
+                         alpha:1.f];
 }
 
 @end
