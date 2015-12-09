@@ -45,6 +45,63 @@
 
 }
 
+- (void)collectionView:(UICollectionView *)cv
+          addIndexPath:(NSIndexPath *)indexPath
+              completionBlock:(void(^)(void))block {
+
+  NSParameterAssert(cv);
+  NSParameterAssert(indexPath);
+
+  if (indexPath.row > self.numbers.count) {
+    return;
+  }
+
+  RFViewModel * __weak weakSelf = self;
+
+  [cv performBatchUpdates:^(void) {
+    NSInteger index = indexPath.row;
+
+    [weakSelf.numbers insertObject:@(weakSelf.numbers.count + 1)
+                                     atIndex: (NSUInteger)index];
+
+    [weakSelf.numberWidths insertObject:@(1 + arc4random() % 3)
+                                          atIndex: (NSUInteger)index];
+
+    [weakSelf.numberHeights insertObject:@(1 + arc4random() % 3)
+                                           atIndex: (NSUInteger)index];
+
+    [cv insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow: (NSInteger)index inSection: 0]]];
+  }
+                                completion:^(BOOL done __unused) {
+                                  block();
+                                }
+   ];
+}
+
+- (void)collectionView:(UICollectionView *)cv
+       removeIndexPath:(NSIndexPath *)indexPath
+              completionBlock:(void(^)(void))block {
+  NSParameterAssert(cv);
+  NSParameterAssert(indexPath);
+  
+  if(!self.numbers.count || indexPath.row > self.numbers.count) {
+    return;
+  }
+
+  RFViewModel * __weak weakSelf = self;
+
+  [cv performBatchUpdates:^{
+    NSInteger index = indexPath.row;
+    [weakSelf.numbers removeObjectAtIndex:(NSUInteger)index];
+    [weakSelf.numberWidths removeObjectAtIndex:(NSUInteger)index];
+    [weakSelf.numberHeights removeObjectAtIndex:(NSUInteger)index];
+    [cv deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:(NSInteger)index inSection:0]]];
+  }
+                                completion:^(BOOL done __unused) {
+                                  block();
+                                }];
+}
+
 #pragma mark - Collection view data source
 - (NSInteger)collectionView:(UICollectionView * __unused)view numberOfItemsInSection:(NSInteger __unused)section {
   return (NSInteger)self.numbers.count;

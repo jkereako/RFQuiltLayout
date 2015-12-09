@@ -17,6 +17,8 @@
 @property (nonatomic) NSMutableArray* numberWidths;
 @property (nonatomic) NSMutableArray* numberHeights;
 
+- (void)collectionView:(UICollectionView *)cv addIndexPath:(NSIndexPath *)indexPath completionBlock:(void(^)(void))block;
+- (void)collectionView:(UICollectionView *)cv removeIndexPath:(NSIndexPath *)indexPath completionBlock:(void(^)(void))block;
 - (void)refreshData;
 
 @end

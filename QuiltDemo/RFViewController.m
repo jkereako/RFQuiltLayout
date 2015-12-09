@@ -41,28 +41,53 @@
 
 #pragma mark - Actions
 - (IBAction)add:(UIBarButtonItem * __unused)sender {
+  if (self.isAnimating) {
+    return;
+  }
+
   NSArray *visibleIndexPaths = [self.collectionView indexPathsForVisibleItems];
 
+  RFViewController * __weak weakSelf = self;
+
+  self.animating = YES;
+
   if (!visibleIndexPaths.count) {
-    [self addIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+    [self.viewModel collectionView:self.collectionView
+                      addIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]
+                   completionBlock:^(void){
+                     weakSelf.animating = NO;
+                   }];
 
     return;
   }
 
-  [self addIndexPath:visibleIndexPaths[0]];
+  [self.viewModel collectionView:self.collectionView
+                    addIndexPath:visibleIndexPaths[0]
+                 completionBlock:^(void){
+                   weakSelf.animating = NO;
+                 }];
 
 }
 
 - (IBAction)remove:(UIBarButtonItem * __unused)sender {
 
-  if (!self.viewModel.numbers.count) {
+  if (!self.viewModel.numbers.count || self.isAnimating) {
     return;
   }
 
   NSArray *visibleIndexPaths = [self.collectionView indexPathsForVisibleItems];
   NSIndexPath *toRemove = [visibleIndexPaths objectAtIndex:(arc4random() % visibleIndexPaths.count)];
 
-  [self removeIndexPath:toRemove];
+  RFViewController * __weak weakSelf = self;
+
+  self.animating = YES;
+
+  [self.viewModel collectionView:self.collectionView
+                 removeIndexPath:toRemove
+                 completionBlock:^(void){
+                   weakSelf.animating = NO;
+                 }];
+
 }
 
 - (IBAction)refresh:(UIBarButtonItem * __unused)sender {
@@ -73,66 +98,23 @@
 #pragma mark - UICollectionView Delegate
 - (void)collectionView:(UICollectionView * __unused)collectionView
 didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-  [self removeIndexPath:indexPath];
+
+  if (self.isAnimating) {
+    return;
+  }
+
+  RFViewController * __weak weakSelf = self;
+
+  self.animating = YES;
+
+  [self.viewModel collectionView:self.collectionView
+                 removeIndexPath:indexPath
+                 completionBlock:^(void){
+                   weakSelf.animating = NO;
+                 }];
 }
 
 #pragma mark - Helper methods
-- (void)addIndexPath:(NSIndexPath *)indexPath {
-  if (indexPath.row > self.viewModel.numbers.count) {
-    return;
-  }
 
-  if(self.isAnimating) {
-    return;
-  }
-
-  self.animating = YES;
-  RFViewController * __weak weakSelf = self;
-
-  [self.collectionView performBatchUpdates:^(void) {
-    NSInteger index = indexPath.row;
-
-    [weakSelf.viewModel.numbers insertObject:@(weakSelf.viewModel.numbers.count + 1)
-                                     atIndex: (NSUInteger)index];
-
-    [weakSelf.viewModel.numberWidths insertObject:@(1 + arc4random() % 3)
-                                          atIndex: (NSUInteger)index];
-
-    [weakSelf.viewModel.numberHeights insertObject:@(1 + arc4random() % 3)
-                                           atIndex: (NSUInteger)index];
-
-    [weakSelf.collectionView
-     insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow: (NSInteger)index inSection: 0]]
-     ];
-  }
-                                completion:^(BOOL done __unused) {
-                                  self.animating = NO;
-                                }
-   ];
-}
-
-- (void)removeIndexPath:(NSIndexPath *)indexPath {
-  if(!self.viewModel.numbers.count ||
-     indexPath.row > self.viewModel.numbers.count ||
-     self.isAnimating) {
-    return;
-  }
-
-  self.animating = YES;
-  RFViewController * __weak weakSelf = self;
-
-  [self.collectionView performBatchUpdates:^{
-    NSInteger index = indexPath.row;
-    [weakSelf.viewModel.numbers removeObjectAtIndex:(NSUInteger)index];
-    [weakSelf.viewModel.numberWidths removeObjectAtIndex:(NSUInteger)index];
-    [weakSelf.viewModel.numberHeights removeObjectAtIndex:(NSUInteger)index];
-    [weakSelf.collectionView
-     deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:(NSInteger)index inSection:0]]
-     ];
-  }
-                                completion:^(BOOL done __unused) {
-                                  weakSelf.animating = NO;
-                                }];
-}
 
 @end
