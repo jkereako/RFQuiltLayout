@@ -12,7 +12,8 @@
 
 @implementation RFAppDelegate
 
-- (BOOL)application:(UIApplication *  __unused)application didFinishLaunchingWithOptions:(NSDictionary *  __unused)launchOptions {
+- (BOOL)application:(UIApplication *  __unused)application
+didFinishLaunchingWithOptions:(NSDictionary *  __unused)launchOptions {
 
     return YES;
 }
