@@ -45,7 +45,7 @@
 }
 
 #pragma mark - Actions
-- (IBAction)add:(UIBarButtonItem *)sender {
+- (IBAction)add:(UIBarButtonItem * __unused)sender {
   NSArray *visibleIndexPaths = [self.collectionView indexPathsForVisibleItems];
 
   if (!visibleIndexPaths.count) {
@@ -58,7 +58,7 @@
 
 }
 
-- (IBAction)remove:(UIBarButtonItem *)sender {
+- (IBAction)remove:(UIBarButtonItem * __unused)sender {
 
   if (!self.viewModel.numbers.count) {
     return;
@@ -70,13 +70,13 @@
   [self removeIndexPath:toRemove];
 }
 
-- (IBAction)refresh:(UIBarButtonItem *)sender {
+- (IBAction)refresh:(UIBarButtonItem * __unused)sender {
   [self.viewModel refreshData];
   [self.collectionView reloadData];
 }
 
 #pragma mark - UICollectionView Delegate
-- (void)collectionView:(UICollectionView *)collectionView
+- (void)collectionView:(UICollectionView * __unused)collectionView
 didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
   [self removeIndexPath:indexPath];
 }
@@ -110,7 +110,7 @@ didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
      insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow: (NSInteger)index inSection: 0]]
      ];
   }
-                                completion:^(BOOL done) {
+                                completion:^(BOOL done __unused) {
                                   self.animating = NO;
                                 }
    ];
@@ -135,7 +135,7 @@ didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
      deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:(NSInteger)index inSection:0]]
      ];
   }
-                                completion:^(BOOL done) {
+                                completion:^(BOOL done __unused) {
                                   weakSelf.animating = NO;
                                 }];
 }

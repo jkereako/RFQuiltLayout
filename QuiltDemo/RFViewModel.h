@@ -6,7 +6,7 @@
 //  Copyright © 2015 Bryce Redd. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+@import Foundation;
 #import "RFQuiltLayout.h"
 
 @class RFViewController;

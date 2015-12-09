@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Bryce Redd. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 #import "RFQuiltLayout.h"
 
 @interface RFViewController : UIViewController

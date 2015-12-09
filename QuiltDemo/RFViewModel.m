@@ -46,7 +46,7 @@
 }
 
 #pragma mark - Collection view data source
-- (NSInteger)collectionView:(UICollectionView *)view numberOfItemsInSection:(NSInteger)section {
+- (NSInteger)collectionView:(UICollectionView * __unused)view numberOfItemsInSection:(NSInteger __unused)section {
   return (NSInteger)self.numbers.count;
 }
 
@@ -73,7 +73,7 @@
 
 #pragma mark – RFQuiltLayoutDelegate
 
--(CGSize) collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout blockSizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+-(CGSize) collectionView:(UICollectionView * __unused)collectionView layout:(UICollectionViewLayout * __unused)collectionViewLayout blockSizeForItemAtIndexPath:(NSIndexPath *)indexPath{
 
   if(indexPath.row >= self.numbers.count) {
     NSLog(@"Asking for index paths of non-existant cells!! %ld from %lu cells", (long)indexPath.row, (unsigned long)self.numbers.count);
@@ -85,7 +85,7 @@
   return CGSizeMake(width, height);
 }
 
-- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetsForItemAtIndexPath:(NSIndexPath *)indexPath {
+- (UIEdgeInsets)collectionView:(UICollectionView * __unused)collectionView layout:(UICollectionViewLayout * __unused)collectionViewLayout insetsForItemAtIndexPath:(NSIndexPath * __unused)indexPath {
   return UIEdgeInsetsMake(2, 2, 2, 2);
 }
 

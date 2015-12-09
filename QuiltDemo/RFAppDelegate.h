@@ -6,12 +6,12 @@
 //  Copyright (c) 2012 Bryce Redd. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 
 @class RFViewController;
 
 @interface RFAppDelegate : UIResponder <UIApplicationDelegate>
 
-@property (strong, nonatomic) UIWindow *window;
+@property (nonatomic) UIWindow *window;
 
 @end
