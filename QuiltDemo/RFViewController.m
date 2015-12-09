@@ -33,6 +33,7 @@
   RFQuiltLayout *layout = (RFQuiltLayout *)self.collectionView.collectionViewLayout;
   layout.direction = UICollectionViewScrollDirectionVertical;
   layout.cellSize = CGSizeMake(75, 75);
+  layout.preemptivelyRenderLayout = NO;
 
   // The only delegate method `viewModel` invokes is `configureCell:withObject:`. It is the proper
   // way to communicate between model and controller.

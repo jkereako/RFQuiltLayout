@@ -35,8 +35,8 @@
 - (void)initialize;
 - (void)fillInBlocksToIndexPath:(NSIndexPath *)indexPath;
 - (BOOL)insertCellAtIndexPath:(NSIndexPath *)indexPath;
-- (BOOL)traverseCellsBetweenUnrestrictedDimension:(NSUInteger)start and:(NSUInteger)end
-                                         iterator:(BOOL(^)(CGPoint))block;
+- (BOOL)traverseCellsBetweenRows:(NSUInteger)start and:(NSUInteger)end
+                                         block:(BOOL(^)(CGPoint))block;
 - (BOOL)traverseCellsForCoordinate:(CGPoint)point withSize:(CGSize)size iterator:(BOOL(^)(CGPoint))block;
 - (BOOL)traverseOpenCells:(BOOL(^)(CGPoint))block;
 - (void)clearPositions;
@@ -75,6 +75,7 @@
   // defaults
   self.direction = UICollectionViewScrollDirectionVertical;
   self.cellSize = CGSizeMake(100.f, 100.f);
+  self.preemptivelyRenderLayout = NO;
 }
 
 #pragma mark - Overridden methods
@@ -135,9 +136,9 @@
 
   // find the indexPaths between those rows
   NSMutableSet *attributes = [NSMutableSet set];
-  [self traverseCellsBetweenUnrestrictedDimension:unrestrictedDimensionStart
+  [self traverseCellsBetweenRows:unrestrictedDimensionStart
                                               and:unrestrictedDimensionEnd
-                                         iterator:^(CGPoint point) {
+                                         block:^(CGPoint point) {
                                            NSIndexPath* indexPath;
                                            indexPath = [weakSelf indexPathForCoordinate:point];
 
@@ -434,22 +435,19 @@
 
 // returning no in the callback will
 // terminate the iterations early
-- (BOOL)traverseCellsBetweenUnrestrictedDimension:(NSUInteger)start and:(NSUInteger)end
-                                         iterator:(BOOL(^)(CGPoint))block {
-
-  // the double ;; is deliberate, the unrestricted dimension should iterate indefinitely
-  for(NSUInteger unrestrictedDimension = start; unrestrictedDimension < end; unrestrictedDimension ++) {
-    for(NSUInteger restrictedDimension = 0; restrictedDimension < self.maximumNumberOfItemsInRow; restrictedDimension++) {
+- (BOOL)traverseCellsBetweenRows:(NSUInteger)start and:(NSUInteger)end block:(BOOL(^)(CGPoint))block {
+  for(NSUInteger i = start; i < end; i++) {
+    for(NSUInteger j = 0; j < self.maximumNumberOfItemsInRow; j++) {
 
       CGPoint point = CGPointZero;
 
       switch (self.direction) {
         case UICollectionViewScrollDirectionVertical:
-          point = CGPointMake(restrictedDimension, unrestrictedDimension);
+          point = CGPointMake(j, i);
           break;
 
         case UICollectionViewScrollDirectionHorizontal:
-          point = CGPointMake(unrestrictedDimension, restrictedDimension);
+          point = CGPointMake(i, j);
           break;
       }
 
@@ -481,10 +479,19 @@
 // terminate the iterations early
 - (BOOL)traverseOpenCells:(BOOL(^)(CGPoint))block {
   BOOL allTakenBefore = YES;
-  BOOL isVert = self.direction == UICollectionViewScrollDirectionVertical;
+  NSUInteger unrestrictedDimension = 0;
 
-  // the double ;; is deliberate, the unrestricted dimension should iterate indefinitely
-  for(NSUInteger unrestrictedDimension = (isVert? self.firstOpenSpace.y : self.firstOpenSpace.x);; unrestrictedDimension++) {
+  switch (self.direction) {
+    case UICollectionViewScrollDirectionVertical:
+      unrestrictedDimension = (NSUInteger)self.firstOpenSpace.y;
+      break;
+
+    case UICollectionViewScrollDirectionHorizontal:
+      unrestrictedDimension = (NSUInteger)self.firstOpenSpace.x;
+      break;
+  }
+
+  do {
     for(int restrictedDimension = 0; restrictedDimension < self.maximumNumberOfItemsInRow; restrictedDimension++) {
 
       CGPoint point = CGPointZero;
@@ -512,9 +519,12 @@
         return NO;
       }
     }
-  }
 
-  NSAssert(0, @"Could find no good place for a block!");
+    unrestrictedDimension++;
+  } while (unrestrictedDimension);
+
+  NSAssert(0, @"Unable to find a insertion point for a cell.");
+
   return YES;
 }
 
