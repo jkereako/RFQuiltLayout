@@ -95,14 +95,15 @@
   }
 
   NSArray *visibleIndexPaths = [self.collectionView indexPathsForVisibleItems];
-  NSIndexPath *toRemove = [visibleIndexPaths objectAtIndex:(arc4random() % visibleIndexPaths.count)];
+  // Select a random index path
+  NSIndexPath *indexPath = [visibleIndexPaths objectAtIndex:(arc4random() % visibleIndexPaths.count)];
 
   RFViewController * __weak weakSelf = self;
 
   self.animating = YES;
 
   [self.viewModel collectionView:self.collectionView
-                 removeIndexPath:toRemove
+                 removeIndexPath:indexPath
                  completionBlock:^(void){
                    weakSelf.animating = NO;
                  }];

@@ -48,7 +48,7 @@
 
 - (void)collectionView:(UICollectionView *)cv
           addIndexPath:(NSIndexPath *)indexPath
-              completionBlock:(void(^)(void))block {
+       completionBlock:(void(^)(void))block {
   // Check for nil
   NSParameterAssert(cv);
   NSParameterAssert(indexPath);
@@ -63,29 +63,29 @@
     NSInteger index = indexPath.row;
 
     [weakSelf.numbers insertObject:@(weakSelf.numbers.count + 1)
-                                     atIndex: (NSUInteger)index];
+                           atIndex: (NSUInteger)index];
 
     [weakSelf.numberWidths insertObject:@(1 + arc4random() % 3)
-                                          atIndex: (NSUInteger)index];
+                                atIndex: (NSUInteger)index];
 
     [weakSelf.numberHeights insertObject:@(1 + arc4random() % 3)
-                                           atIndex: (NSUInteger)index];
+                                 atIndex: (NSUInteger)index];
 
     [cv insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow: (NSInteger)index inSection: 0]]];
   }
-                                completion:^(BOOL done __unused) {
-                                  block();
-                                }
+               completion:^(BOOL done __unused) {
+                 block();
+               }
    ];
 }
 
 - (void)collectionView:(UICollectionView *)cv
        removeIndexPath:(NSIndexPath *)indexPath
-              completionBlock:(void(^)(void))block {
+       completionBlock:(void(^)(void))block {
   // Check for nil
   NSParameterAssert(cv);
   NSParameterAssert(indexPath);
-  
+
   if(!self.numbers.count || indexPath.row > self.numbers.count) {
     return;
   }
@@ -99,9 +99,9 @@
     [weakSelf.numberHeights removeObjectAtIndex:(NSUInteger)index];
     [cv deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:(NSInteger)index inSection:0]]];
   }
-                                completion:^(BOOL done __unused) {
-                                  block();
-                                }];
+               completion:^(BOOL done __unused) {
+                 block();
+               }];
 }
 
 #pragma mark - Collection view data source
@@ -123,10 +123,10 @@
   return cell;
 }
 
-#pragma mark – RFQuiltLayoutDelegate
--(CGSize)collectionView:(UICollectionView * __unused)collectionView
-                 layout:(UICollectionViewLayout * __unused)collectionViewLayout
-blockSizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+#pragma mark - RFQuiltLayoutDelegate
+-(CGSize)collectionView:(UICollectionView * __unused)cv
+                 layout:(UICollectionViewLayout * __unused)layout
+ sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
 
   if(indexPath.row >= self.numbers.count) {
     NSLog(@"Asking for index paths of non-existant cells!! %ld from %lu cells",
@@ -139,13 +139,14 @@ blockSizeForItemAtIndexPath:(NSIndexPath *)indexPath{
   return CGSizeMake(width, height);
 }
 
-- (UIEdgeInsets)collectionView:(UICollectionView * __unused)collectionView
-                        layout:(UICollectionViewLayout * __unused)collectionViewLayout
+- (UIEdgeInsets)collectionView:(UICollectionView * __unused)cv
+                        layout:(UICollectionViewLayout * __unused)layout
       insetsForItemAtIndexPath:(NSIndexPath * __unused)indexPath {
 
-  return UIEdgeInsetsMake(2, 2, 2, 2);
+  return UIEdgeInsetsMake(1, 1, 1, 1);
 }
 
+#pragma mark - Helpers
 - (NSUInteger)randomLength {
   // always returns a random length between 1 and 3, weighted towards lower numbers.
   NSUInteger random = arc4random() % 6;

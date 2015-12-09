@@ -546,10 +546,10 @@
   CGSize blockSize = CGSizeMake(1, 1);
 
   if([self.delegate
-      respondsToSelector:@selector(collectionView:layout:blockSizeForItemAtIndexPath:)]
+      respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)]
      ) {
     blockSize = [self.delegate collectionView:[self collectionView]
-                                       layout:self blockSizeForItemAtIndexPath:indexPath];
+                                       layout:self sizeForItemAtIndexPath:indexPath];
   }
 
   return blockSize;
@@ -576,7 +576,8 @@
   }
   
   if(size == 0) {
-    NSLog(@"Cannot fit block of size: %@ in content rect %@!  Defaulting to 1", NSStringFromCGSize(self.cellSize), NSStringFromCGRect(contentRect));
+    NSLog(@"Cannot fit block of size: %@ in content rect %@!  Defaulting to 1",
+          NSStringFromCGSize(self.cellSize), NSStringFromCGRect(contentRect));
     return 1;
   }
   
