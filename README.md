@@ -2,6 +2,8 @@
 This is a cleaned-up version of RFQuiltLayout. I'm doing this to prepare for a
 Swift version of this project.
 
+The most difficult part of this project is understanding what "unrestricted dimension" and "restricted dimension" mean. It means that if your collection view scrolls horizonatally, then the restricted dimension is the number of columns while the unrestricted dimension is the number of rows. Vice versa for vertically scrolling collection views.
+
 RFQUILTLAYOUT
 =============
 
