@@ -65,7 +65,7 @@
 		02E25B0C168B74B0009CA089 /* QuiltDemo */ = {
 			isa = PBXGroup;
 			children = (
-				02E25B29168B74C9009CA089 /* TVQuiltLayout */,
+				02E25B29168B74C9009CA089 /* RFQuiltLayout */,
 				02E25B15168B74B0009CA089 /* RFAppDelegate.h */,
 				02E25B16168B74B0009CA089 /* RFAppDelegate.m */,
 				02E25B1E168B74B0009CA089 /* RFViewController.h */,
@@ -90,13 +90,13 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		02E25B29168B74C9009CA089 /* TVQuiltLayout */ = {
+		02E25B29168B74C9009CA089 /* RFQuiltLayout */ = {
 			isa = PBXGroup;
 			children = (
 				0239B55A168BB0F4008B8AD6 /* RFQuiltLayout.h */,
 				0239B55B168BB0F4008B8AD6 /* RFQuiltLayout.m */,
 			);
-			name = TVQuiltLayout;
+			name = RFQuiltLayout;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
