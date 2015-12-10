@@ -557,7 +557,7 @@
     }
 
     unboundIndex++;
-  } while (unboundIndex);
+  } while (true);
 
   NSAssert(0, @"Unable to find a insertion point for a cell.");
 
