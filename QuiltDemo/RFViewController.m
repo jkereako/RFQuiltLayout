@@ -53,7 +53,7 @@
   NSParameterAssert(object);
 
   NSNumber *number = (NSNumber *)object;
-  cell.backgroundColor = [self colorForNumber: number];
+  cell.backgroundColor = [self colorForNumber:number];
 
   // Fetch the label as defined in the storyboard and assign the `object` to it's `text` property.
   UILabel* label = (UILabel *)[cell viewWithTag:5];
@@ -144,10 +144,10 @@ didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
 
 #pragma mark - Helpers
 - (UIColor *)colorForNumber:(NSNumber *)number {
-  return [UIColor colorWithHue:((19 * number.intValue) % 255)/255.f
-                    saturation:1.f
-                    brightness:1.f
-                         alpha:1.f];
+  return [UIColor colorWithHue:((19 * number.unsignedIntegerValue) % 255)/255.0f
+                    saturation:1.0f
+                    brightness:1.0f
+                         alpha:1.0f];
 }
 
 @end
