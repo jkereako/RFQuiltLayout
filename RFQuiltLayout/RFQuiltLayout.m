@@ -331,13 +331,13 @@
   // the items we'll invert the axis
 
   NSInteger sectionCount = [self.collectionView numberOfSections];
-  NSInteger section = 0;
-  NSInteger row = 0;
+  NSInteger section = (!self.indexPathCache ? 0 : self.indexPathCache.section);
+  NSInteger row = (!self.indexPathCache ? 0 : self.indexPathCache.row + 1);
 
-  for (section = self.indexPathCache.section; section < sectionCount; section++) {
+  while (section < sectionCount) {
     NSInteger rowCount = [self.collectionView numberOfItemsInSection:section];
 
-    for (row = (!self.indexPathCache ? 0 : self.indexPathCache.row + 1); row < rowCount; row++) {
+    while (row < rowCount) {
       NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
 
       if([self insertCellAtIndexPath:indexPath]) {
@@ -358,7 +358,11 @@
 
           break;
       }
+
+      row++;
     }
+
+    section++;
   }
 }
 
