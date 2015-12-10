@@ -118,7 +118,9 @@
                                                              forIndexPath:indexPath];
 
   // Delegate the cell configuration to the view controller.
-  [self.delegate configureCell:cell withObject:self.numbers[(NSUInteger)indexPath.row]];
+  if ([(id)self.delegate respondsToSelector:@selector(configureCell:withObject:)]) {
+    [self.delegate configureCell:cell withObject:self.numbers[(NSUInteger)indexPath.row]];
+  }
 
   return cell;
 }
@@ -142,6 +144,11 @@
 - (UIEdgeInsets)collectionView:(UICollectionView * __unused)cv
                         layout:(UICollectionViewLayout * __unused)layout
       insetsForItemAtIndexPath:(NSIndexPath * __unused)indexPath {
+
+  // Delegate the cell margin definition to the controller
+  if ([(id)self.delegate respondsToSelector:@selector(configureMargins)]) {
+    return [self.delegate configureMargins];
+  }
 
   return UIEdgeInsetsMake(1, 1, 1, 1);
 }

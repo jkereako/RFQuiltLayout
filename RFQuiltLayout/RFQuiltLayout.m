@@ -10,7 +10,7 @@
 @interface RFQuiltLayout ()
 
 @property(nonatomic) CGPoint firstOpenSpace;
-@property(nonatomic) CGPoint furthestBlockCoordinate;
+@property(nonatomic) CGPoint furthestCellPosition;
 
 // A 2x2 dictionary which contains `NSIndexPath` objects to indicate the available and filled cells
 // in the collection view
@@ -41,10 +41,10 @@
  }
 
  */
-@property(nonatomic) NSMutableDictionary *indexPathByCoordinate;
+@property(nonatomic) NSMutableDictionary *indexPathByPosition;
 
 // indexed by "section, row" this will serve as the rapid lookup of block position by indexpath.
-@property(nonatomic) NSMutableDictionary *coordinateByIndexPath;
+@property(nonatomic) NSMutableDictionary *positionByIndexPath;
 
 // previous layout cache.  this is to prevent choppiness when we scroll to the bottom of the screen
 // - uicollectionview will repeatedly call layoutattributesforelementinrect on each scroll event.
@@ -57,19 +57,27 @@
 @property(nonatomic, readonly) NSUInteger maximumNumberOfItemsInBounds;
 
 - (void)initialize;
-- (void)fillInBlocksToIndexPath:(NSIndexPath *)indexPath;
-- (BOOL)insertCellAtIndexPath:(NSIndexPath *)indexPath;
-- (BOOL)traverseCellsBetweenBounds:(NSUInteger)start and:(NSUInteger)end
-                           block:(BOOL(^)(CGPoint))block;
-- (BOOL)traverseCellsForCoordinate:(CGPoint)point withSize:(CGSize)size block:(BOOL(^)(CGPoint))block;
-- (BOOL)traverseOpenCells:(BOOL(^)(CGPoint))block;
 - (void)clearPositions;
-- (NSIndexPath *)indexPathForCoordinate:(CGPoint)coordinate;
-- (CGPoint)coordinateForIndexPath:(NSIndexPath *)path;
-- (void)setCoordinate:(CGPoint)point forIndexPath:(NSIndexPath *)indexPath;
-- (void)fillInBlocksToUnboundRow:(NSUInteger)endRow;
+
+//-- Cell insertion
+- (void)insertCellsToUnboundRow:(NSUInteger)endRow;
+- (void)insertCellsToIndexPath:(NSIndexPath *)indexPath;
+- (BOOL)insertCellAtIndexPath:(NSIndexPath *)indexPath;
+
+//-- Cell traversal
+- (BOOL)traverseCellsBetweenBounds:(NSUInteger)start and:(NSUInteger)end
+                             block:(BOOL(^)(CGPoint))block;
+- (BOOL)traverseCellsForPosition:(CGPoint)point withSize:(CGSize)size block:(BOOL(^)(CGPoint))block;
+- (BOOL)traverseOpenCells:(BOOL(^)(CGPoint))block;
+
+//-- Getters
 - (CGSize)sizeForCellAtIndexPath:(NSIndexPath *)indexPath;
 - (CGRect)rectForIndexPath:(NSIndexPath *)path;
+- (NSIndexPath *)indexPathForPosition:(CGPoint)position;
+- (CGPoint)positionForIndexPath:(NSIndexPath *)path;
+
+//-- Setters
+- (void)setPosition:(CGPoint)point forIndexPath:(NSIndexPath *)indexPath;
 
 @end
 
@@ -102,6 +110,11 @@
   self.preemptivelyRenderLayout = NO;
 }
 
+- (void)clearPositions {
+  self.indexPathByPosition = [NSMutableDictionary dictionary];
+  self.positionByIndexPath = [NSMutableDictionary dictionary];
+}
+
 #pragma mark - Overridden methods
 - (CGSize)collectionViewContentSize {
   CGRect contentRect = UIEdgeInsetsInsetRect(self.collectionView.frame,
@@ -110,10 +123,10 @@
   switch (self.direction) {
     case UICollectionViewScrollDirectionVertical:
       return CGSizeMake(CGRectGetWidth(contentRect),
-                        (self.furthestBlockCoordinate.y + 1) * self.cellSize.height);
+                        (self.furthestCellPosition.y + 1) * self.cellSize.height);
 
     case UICollectionViewScrollDirectionHorizontal:
-      return CGSizeMake((self.furthestBlockCoordinate.x + 1) * self.cellSize.width,
+      return CGSizeMake((self.furthestCellPosition.x + 1) * self.cellSize.width,
                         CGRectGetHeight(contentRect));
   }
 }
@@ -150,11 +163,11 @@
   NSUInteger unboundEnd = unboundStart + unboundLength;
 
   if (self.shouldPreemptivelyRenderLayout) {
-    [self fillInBlocksToUnboundRow:INT_MAX];
+    [self insertCellsToUnboundRow:INT_MAX];
   }
 
   else {
-    [self fillInBlocksToUnboundRow:unboundEnd];
+    [self insertCellsToUnboundRow:unboundEnd];
   }
 
   RFQuiltLayout * __weak weakSelf = self;
@@ -162,17 +175,17 @@
   // find the indexPaths between those rows
   NSMutableSet *attributes = [NSMutableSet set];
   [self traverseCellsBetweenBounds:unboundStart
-                             and:unboundEnd
-                           block:^(CGPoint point) {
-                             NSIndexPath* indexPath;
-                             indexPath = [weakSelf indexPathForCoordinate:point];
+                               and:unboundEnd
+                             block:^(CGPoint point) {
+                               NSIndexPath* indexPath;
+                               indexPath = [weakSelf indexPathForPosition:point];
 
-                             if(indexPath) {
-                               [attributes addObject:[weakSelf layoutAttributesForItemAtIndexPath:indexPath]];
-                             }
+                               if(indexPath) {
+                                 [attributes addObject:[weakSelf layoutAttributesForItemAtIndexPath:indexPath]];
+                               }
 
-                             return YES;
-                           }];
+                               return YES;
+                             }];
 
   // Cache the layout attributes
   return (self.layoutAttributesCache = [attributes allObjects]);
@@ -206,7 +219,7 @@
     switch (item.updateAction) {
       case UICollectionUpdateActionInsert:
       case UICollectionUpdateActionMove:
-        [self fillInBlocksToIndexPath:item.indexPathAfterUpdate];
+        [self insertCellsToIndexPath:item.indexPathAfterUpdate];
         break;
 
       default:
@@ -218,7 +231,7 @@
 - (void)invalidateLayout {
   [super invalidateLayout];
 
-  _furthestBlockCoordinate = CGPointZero;
+  _furthestCellPosition = CGPointZero;
   self.firstOpenSpace = CGPointZero;
   self.layoutRectCache = CGRectZero;
   self.layoutAttributesCache = nil;
@@ -250,16 +263,16 @@
   }
 
   if (self.shouldPreemptivelyRenderLayout) {
-    [self fillInBlocksToUnboundRow:INT_MAX];
+    [self insertCellsToUnboundRow:INT_MAX];
   }
 
   else {
-    [self fillInBlocksToUnboundRow:unbound];
+    [self insertCellsToUnboundRow:unbound];
   }
 }
 
 
-#pragma mark - Getters
+#pragma mark - Property getters
 /**
  Calculates the maximum number of items which can fit in a row inside the collection view. This
  provides an upper bound for the layout.
@@ -289,7 +302,7 @@
   return size;
 }
 
-#pragma mark - Setters
+#pragma mark - Property setters
 - (void)setDirection:(UICollectionViewScrollDirection)direction {
   _direction = direction;
 
@@ -302,14 +315,16 @@
   [self invalidateLayout];
 }
 
-- (void)setFurthestBlockCoordinate:(CGPoint)point {
-  _furthestBlockCoordinate = CGPointMake(MAX(_furthestBlockCoordinate.x, point.x),
-                                         MAX(_furthestBlockCoordinate.y, point.y)
-                                         );
+- (void)setFurthestCellPosition:(CGPoint)point {
+  _furthestCellPosition = CGPointMake(MAX(_furthestCellPosition.x, point.x),
+                                      MAX(_furthestCellPosition.y, point.y)
+                                      );
 }
 
 #pragma mark - Private methods
-- (void)fillInBlocksToUnboundRow:(NSUInteger)endRow {
+
+#pragma mark Cell insertion
+- (void)insertCellsToUnboundRow:(NSUInteger)endRow {
 
   // we'll have our data structure as if we're planning
   // a vertical layout, then when we assign positions to
@@ -347,7 +362,7 @@
   }
 }
 
-- (void)fillInBlocksToIndexPath:(NSIndexPath *)indexPath {
+- (void)insertCellsToIndexPath:(NSIndexPath *)indexPath {
 
   // we'll have our data structure as if we're planning
   // a vertical layout, then when we assign positions to
@@ -388,27 +403,37 @@
     // we need to make sure each square in the desired
     // area is available before we can place the square
 
-    BOOL didTraverseAllBlocks = [self traverseCellsForCoordinate:blockOrigin
-                                                        withSize:cellSize
-                                                        block:^(CGPoint point) {
-                                                          BOOL hasSpaceAvailable = (BOOL)![self indexPathForCoordinate:point];
-                                                          BOOL isInBounds = NO;
-                                                          BOOL hasMaximumBoundSize = NO;
+    BOOL didTraverseAllBlocks = [self traverseCellsForPosition:blockOrigin
+                                                      withSize:cellSize
+                                                         block:^(CGPoint point) {
+                                                           BOOL hasSpaceAvailable = (BOOL)![self indexPathForPosition:point];
+                                                           BOOL isInBounds = NO;
+                                                           BOOL hasMaximumBoundSize = NO;
 
-                                                          switch (weakSelf.direction) {
-                                                            case UICollectionViewScrollDirectionVertical:
-                                                              isInBounds = (point.x < weakSelf.maximumNumberOfItemsInBounds);
-                                                              hasMaximumBoundSize = (blockOrigin.x == 0);
-                                                              break;
+                                                           switch (weakSelf.direction) {
+                                                             case UICollectionViewScrollDirectionVertical:
+                                                               isInBounds = (point.x < weakSelf.maximumNumberOfItemsInBounds);
+                                                               hasMaximumBoundSize = (blockOrigin.x == 0);
+                                                               break;
 
-                                                            case UICollectionViewScrollDirectionHorizontal:
-                                                              isInBounds = (point.y < weakSelf.maximumNumberOfItemsInBounds);
-                                                              hasMaximumBoundSize = (blockOrigin.y == 0);
-                                                              break;
-                                                          }
+                                                             case UICollectionViewScrollDirectionHorizontal:
+                                                               isInBounds = (point.y < weakSelf.maximumNumberOfItemsInBounds);
+                                                               hasMaximumBoundSize = (blockOrigin.y == 0);
+                                                               break;
+                                                           }
 
-                                                          return (BOOL)(hasSpaceAvailable && isInBounds);
-                                                        }];
+                                                           // This condition must be handled,
+                                                           // otherwise, we will have an infinite
+                                                           // loop.
+                                                           if (hasSpaceAvailable &&
+                                                               hasMaximumBoundSize &&
+                                                               !isInBounds) {
+                                                             NSLog(@"View is not large enough to hold cell... inserting anyway.");
+                                                             return YES;
+                                                           }
+
+                                                           return (BOOL)(hasSpaceAvailable && isInBounds);
+                                                         }];
 
 
     if (!didTraverseAllBlocks) {
@@ -420,15 +445,15 @@
 
     [self setIndexPath:indexPath forPosition:blockOrigin];
 
-    [self traverseCellsForCoordinate:blockOrigin
-                            withSize:cellSize
-                            block:^(CGPoint point) {
-                              [self setCoordinate:point forIndexPath:indexPath];
+    [self traverseCellsForPosition:blockOrigin
+                          withSize:cellSize
+                             block:^(CGPoint point) {
+                               [self setPosition:point forIndexPath:indexPath];
 
-                              self.furthestBlockCoordinate = point;
+                               self.furthestCellPosition = point;
 
-                              return YES;
-                            }];
+                               return YES;
+                             }];
 
     return NO;
   }];
@@ -436,6 +461,7 @@
 
 // returning no in the callback will
 // terminate the iterations early
+#pragma mark Cell traversal
 - (BOOL)traverseCellsBetweenBounds:(NSUInteger)start
                                and:(NSUInteger)end
                              block:(BOOL(^)(CGPoint))block {
@@ -466,9 +492,9 @@
   return YES;
 }
 
-- (BOOL)traverseCellsForCoordinate:(CGPoint)point
-                          withSize:(CGSize)size
-                          block:(BOOL(^)(CGPoint))block {
+- (BOOL)traverseCellsForPosition:(CGPoint)point
+                        withSize:(CGSize)size
+                           block:(BOOL(^)(CGPoint))block {
   NSUInteger column = 0;
   NSUInteger row = 0;
 
@@ -513,7 +539,7 @@
           break;
       }
 
-      if([self indexPathForCoordinate:point]) {
+      if([self indexPathForPosition:point]) {
         continue;
       }
 
@@ -536,42 +562,93 @@
   return YES;
 }
 
-- (void)clearPositions {
-  self.indexPathByCoordinate = [NSMutableDictionary dictionary];
-  self.coordinateByIndexPath = [NSMutableDictionary dictionary];
+#pragma mark Getters
+
+- (CGRect)rectForIndexPath:(NSIndexPath *)path {
+  CGPoint position = [self positionForIndexPath:path];
+  CGSize elementSize = [self sizeForCellAtIndexPath:path];
+  CGFloat padding = 0.0f;
+  CGRect contentRect = UIEdgeInsetsInsetRect(self.collectionView.frame,
+                                             self.collectionView.contentInset);
+
+  switch (self.direction) {
+    case UICollectionViewScrollDirectionVertical: {
+      CGFloat width = CGRectGetWidth(contentRect);
+      // Because the cells vary in size, we must pad the cells to center them on the view. This will
+      // create a margin on either side.
+      padding = (width - self.maximumNumberOfItemsInBounds * self.cellSize.width) / 2;
+
+      return CGRectMake(position.x * self.cellSize.width + padding,   // x
+                        position.y * self.cellSize.height,            // y
+                        elementSize.width * self.cellSize.width,      // width
+                        elementSize.height * self.cellSize.height);   // height
+
+    }
+
+    case UICollectionViewScrollDirectionHorizontal: {
+      CGFloat height = CGRectGetHeight(contentRect);
+      padding = (height - self.maximumNumberOfItemsInBounds * self.cellSize.height) / 2;
+
+      return CGRectMake(position.x * self.cellSize.width,
+                        position.y * self.cellSize.height + padding,
+                        elementSize.width * self.cellSize.width,
+                        elementSize.height * self.cellSize.height);
+
+    }
+  }
 }
 
-- (CGPoint)coordinateForIndexPath:(NSIndexPath *)path {
-  // if item does not have a position, we will make one!
-  if(!self.coordinateByIndexPath[@(path.section)][@(path.row)]) {
-    [self fillInBlocksToIndexPath:path];
+
+/**
+ Defines the size for an item at a particular index path. Implement this to dynamically size cells
+ at run-time.
+ */
+- (CGSize)sizeForCellAtIndexPath:(NSIndexPath *)indexPath {
+  // The default size is 1x1
+  CGSize size = CGSizeMake(1, 1);
+
+  if([self.delegate
+      respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)]
+     ) {
+    size = [self.delegate collectionView:[self collectionView]
+                                  layout:self sizeForItemAtIndexPath:indexPath];
   }
 
-  return [self.coordinateByIndexPath[@(path.section)][@(path.row)] CGPointValue];
+  return size;
 }
 
-- (NSIndexPath *)indexPathForCoordinate:(CGPoint)coordinate {
+- (CGPoint)positionForIndexPath:(NSIndexPath *)path {
+  // if item does not have a position, we will make one!
+  if(!self.positionByIndexPath[@(path.section)][@(path.row)]) {
+    [self insertCellsToIndexPath:path];
+  }
+
+  return [self.positionByIndexPath[@(path.section)][@(path.row)] CGPointValue];
+}
+
+- (NSIndexPath *)indexPathForPosition:(CGPoint)position {
   NSNumber *unboundPoint, *boundPoint;
 
   switch (self.direction) {
     case UICollectionViewScrollDirectionVertical:
-      unboundPoint = @(coordinate.y);
-      boundPoint = @(coordinate.x);
+      unboundPoint = @(position.y);
+      boundPoint = @(position.x);
       break;
 
     case UICollectionViewScrollDirectionHorizontal:
-      unboundPoint = @(coordinate.x);
-      boundPoint = @(coordinate.y);
+      unboundPoint = @(position.x);
+      boundPoint = @(position.y);
       break;
   }
 
   // to avoid creating unbounded nsmutabledictionaries we should
   // have the innerdict be the unrestricted dimension
 
-  return self.indexPathByCoordinate[boundPoint][unboundPoint];
+  return self.indexPathByPosition[boundPoint][unboundPoint];
 }
 
-- (void)setCoordinate:(CGPoint)point forIndexPath:(NSIndexPath *)indexPath {
+#pragma mark Setters
+- (void)setPosition:(CGPoint)point forIndexPath:(NSIndexPath *)indexPath {
 
   // to avoid creating unbounded nsmutabledictionaries we should
   // have the innerdict be the unrestricted dimension
@@ -589,70 +666,22 @@
       boundPoint = @(point.y);
       break;
   }
-
+  
   // If no value is set for the index `boundPoint`, create a new dictionary
-  if (!self.indexPathByCoordinate[boundPoint]) {
-    self.indexPathByCoordinate[boundPoint] = [NSMutableDictionary dictionary];
+  if (!self.indexPathByPosition[boundPoint]) {
+    self.indexPathByPosition[boundPoint] = [NSMutableDictionary dictionary];
   }
-
-  self.indexPathByCoordinate[boundPoint][unboundPoint] = indexPath;
+  
+  self.indexPathByPosition[boundPoint][unboundPoint] = indexPath;
 }
 
 - (void)setIndexPath:(NSIndexPath *)path forPosition:(CGPoint)point {
   // If no value is set for the index `@(path.section)`, create a new dictionary
-  if (!self.coordinateByIndexPath[@(path.section)]) {
-    self.coordinateByIndexPath[@(path.section)] = [NSMutableDictionary dictionary];
-  }
-
-  self.coordinateByIndexPath[@(path.section)][@(path.row)] = [NSValue valueWithCGPoint:point];
-}
-
-- (CGRect)rectForIndexPath:(NSIndexPath *)path {
-  CGPoint position = [self coordinateForIndexPath:path];
-  CGSize elementSize = [self sizeForCellAtIndexPath:path];
-  CGFloat padding = 0.0f;
-  CGRect contentRect = UIEdgeInsetsInsetRect(self.collectionView.frame,
-                                             self.collectionView.contentInset);
-
-  switch (self.direction) {
-    case UICollectionViewScrollDirectionVertical: {
-
-      padding = (CGRectGetWidth(contentRect) - self.maximumNumberOfItemsInBounds * self.cellSize.width) / 2;
-      return CGRectMake(position.x * self.cellSize.width + padding,
-                        position.y * self.cellSize.height,
-                        elementSize.width * self.cellSize.width,
-                        elementSize.height * self.cellSize.height);
-
-    }
-
-    case UICollectionViewScrollDirectionHorizontal: {
-      padding = (CGRectGetHeight(contentRect) - self.maximumNumberOfItemsInBounds * self.cellSize.height) / 2;
-      return CGRectMake(position.x * self.cellSize.width,
-                        position.y * self.cellSize.height + padding,
-                        elementSize.width * self.cellSize.width,
-                        elementSize.height * self.cellSize.height);
-      
-    }
-  }
-}
-
-
-/**
- Defines the size for an item at a particular index path. Implement this to dynamically size cells
- at run-time.
- */
-- (CGSize)sizeForCellAtIndexPath:(NSIndexPath *)indexPath {
-  // The default size is 1x1
-  CGSize size = CGSizeMake(1, 1);
-  
-  if([self.delegate
-      respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)]
-     ) {
-    size = [self.delegate collectionView:[self collectionView]
-                                  layout:self sizeForItemAtIndexPath:indexPath];
+  if (!self.positionByIndexPath[@(path.section)]) {
+    self.positionByIndexPath[@(path.section)] = [NSMutableDictionary dictionary];
   }
   
-  return size;
+  self.positionByIndexPath[@(path.section)][@(path.row)] = [NSValue valueWithCGPoint:point];
 }
 
 @end
