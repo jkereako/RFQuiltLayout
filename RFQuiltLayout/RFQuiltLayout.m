@@ -60,7 +60,7 @@
 - (void)clearPositions;
 
 //-- Cell insertion
-- (void)insertCellsToUnboundRow:(NSUInteger)endRow;
+- (void)insertCellsToUnboundIndex:(NSUInteger)index;
 - (void)insertCellsToIndexPath:(NSIndexPath *)indexPath;
 - (BOOL)insertCellAtIndexPath:(NSIndexPath *)indexPath;
 
@@ -163,11 +163,11 @@
   NSUInteger unboundEnd = unboundStart + unboundLength;
 
   if (self.shouldPreemptivelyRenderLayout) {
-    [self insertCellsToUnboundRow:INT_MAX];
+    [self insertCellsToUnboundIndex:INT_MAX];
   }
 
   else {
-    [self insertCellsToUnboundRow:unboundEnd];
+    [self insertCellsToUnboundIndex:unboundEnd];
   }
 
   RFQuiltLayout * __weak weakSelf = self;
@@ -247,27 +247,27 @@
     @throw([NSException exceptionWithName:@"NotFound" reason:@"Delegate not set" userInfo:nil]);
   }
 
-  NSUInteger unbound = 0;
+  NSUInteger unboundIndex = 0;
   CGRect scrollFrame = CGRectMake(self.collectionView.contentOffset.x,
                                   self.collectionView.contentOffset.y,
                                   self.collectionView.frame.size.width,
                                   self.collectionView.frame.size.height);
   switch (self.direction) {
     case UICollectionViewScrollDirectionVertical:
-      unbound = (NSUInteger)(CGRectGetMaxY(scrollFrame) / self.cellSize.height) + 1;
+      unboundIndex = (NSUInteger)(CGRectGetMaxY(scrollFrame) / self.cellSize.height) + 1;
       break;
 
     case UICollectionViewScrollDirectionHorizontal:
-      unbound = (NSUInteger)(CGRectGetMaxY(scrollFrame) / self.cellSize.width) + 1;
+      unboundIndex = (NSUInteger)(CGRectGetMaxY(scrollFrame) / self.cellSize.width) + 1;
       break;
   }
 
   if (self.shouldPreemptivelyRenderLayout) {
-    [self insertCellsToUnboundRow:INT_MAX];
+    [self insertCellsToUnboundIndex:INT_MAX];
   }
 
   else {
-    [self insertCellsToUnboundRow:unbound];
+    [self insertCellsToUnboundIndex:unboundIndex];
   }
 }
 
@@ -324,7 +324,7 @@
 #pragma mark - Private methods
 
 #pragma mark Cell insertion
-- (void)insertCellsToUnboundRow:(NSUInteger)endRow {
+- (void)insertCellsToUnboundIndex:(NSUInteger)index {
 
   // we'll have our data structure as if we're planning
   // a vertical layout, then when we assign positions to
@@ -346,13 +346,13 @@
 
       switch (self.direction) {
         case UICollectionViewScrollDirectionVertical:
-          if (self.firstOpenSpace.y >= endRow) {
+          if (self.firstOpenSpace.y >= index) {
             return;
           }
           break;
 
         case UICollectionViewScrollDirectionHorizontal:
-          if (self.firstOpenSpace.x >= endRow) {
+          if (self.firstOpenSpace.x >= index) {
             return;
           }
 
@@ -375,7 +375,7 @@
   // Iterate over the sections
   for (section = self.indexPathCache.section; section < sectionCount; section++) {
     NSInteger rowCount = [self.collectionView numberOfItemsInSection:section];
-
+    
     // Iterate over the rows
     for (row = (!self.indexPathCache ? 0 : self.indexPathCache.row + 1); row < rowCount; row++) {
 
@@ -462,9 +462,7 @@
 // returning no in the callback will
 // terminate the iterations early
 #pragma mark Cell traversal
-- (BOOL)traverseCellsBetweenBounds:(NSUInteger)start
-                               and:(NSUInteger)end
-                             block:(BOOL(^)(CGPoint))block {
+- (BOOL)traverseCellsBetweenBounds:(NSUInteger)start and:(NSUInteger)end block:(BOOL(^)(CGPoint))block {
   NSUInteger unbound = 0;
   NSUInteger bounds = 0;
 
@@ -492,9 +490,7 @@
   return YES;
 }
 
-- (BOOL)traverseCellsForPosition:(CGPoint)point
-                        withSize:(CGSize)size
-                           block:(BOOL(^)(CGPoint))block {
+- (BOOL)traverseCellsForPosition:(CGPoint)point withSize:(CGSize)size block:(BOOL(^)(CGPoint))block {
   NSUInteger column = 0;
   NSUInteger row = 0;
 
@@ -512,30 +508,32 @@
 
 - (BOOL)traverseOpenCells:(BOOL(^)(CGPoint))block {
   BOOL allTakenBefore = YES;
-  NSUInteger unbound = 0;
+  NSUInteger unboundIndex = 0;
 
   switch (self.direction) {
     case UICollectionViewScrollDirectionVertical:
-      unbound = (NSUInteger)self.firstOpenSpace.y;
+      unboundIndex = (NSUInteger)self.firstOpenSpace.y;
       break;
 
     case UICollectionViewScrollDirectionHorizontal:
-      unbound = (NSUInteger)self.firstOpenSpace.x;
+      unboundIndex = (NSUInteger)self.firstOpenSpace.x;
       break;
   }
 
   do {
-    for(NSUInteger bounds = 0; bounds < self.maximumNumberOfItemsInBounds; bounds++) {
+    NSUInteger boundIndex = 0;
+
+    for(boundIndex = 0; boundIndex < self.maximumNumberOfItemsInBounds; boundIndex++) {
 
       CGPoint point = CGPointZero;
 
       switch (self.direction) {
         case UICollectionViewScrollDirectionVertical:
-          point = CGPointMake(bounds, unbound);
+          point = CGPointMake(boundIndex, unboundIndex);
           break;
 
         case UICollectionViewScrollDirectionHorizontal:
-          point = CGPointMake(unbound, bounds);
+          point = CGPointMake(unboundIndex, boundIndex);
           break;
       }
 
@@ -554,8 +552,8 @@
       }
     }
 
-    unbound++;
-  } while (unbound);
+    unboundIndex++;
+  } while (unboundIndex);
 
   NSAssert(0, @"Unable to find a insertion point for a cell.");
 

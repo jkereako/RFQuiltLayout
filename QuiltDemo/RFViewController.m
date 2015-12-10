@@ -47,10 +47,6 @@
 }
 
 #pragma mark - RFCollectionViewControllerDelegate
-- (UIEdgeInsets)configureMargins {
-  return UIEdgeInsetsMake(1.0f, 1.0f, 1.0f, 1.0f);
-}
-
 - (void)configureCell:(UICollectionViewCell *)cell withObject:(id)object {
   // Check for nil
   NSParameterAssert(cell);

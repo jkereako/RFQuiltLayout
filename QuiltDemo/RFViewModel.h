@@ -17,7 +17,6 @@
 @optional
 
 - (void)configureCell:(UICollectionViewCell *)cell withObject:(id)object;
-- (UIEdgeInsets)configureMargins;
 
 @end
 

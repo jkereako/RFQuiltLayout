@@ -128,12 +128,9 @@
 #pragma mark - RFQuiltLayoutDelegate
 -(CGSize)collectionView:(UICollectionView * __unused)cv
                  layout:(UICollectionViewLayout * __unused)layout
- sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
-
-  if(indexPath.row >= self.numbers.count) {
-    NSLog(@"Asking for index paths of non-existant cells!! %ld from %lu cells",
-          (long)indexPath.row, (unsigned long)self.numbers.count);
-  }
+ sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+  
+  NSAssert(indexPath.row <= self.numbers.count, @"\n\n  ERROR: Requested non-existant cell.");
 
   CGFloat width = [self.numberWidths[(NSUInteger)indexPath.row] floatValue];
   CGFloat height = [self.numberHeights[(NSUInteger)indexPath.row] floatValue];
@@ -145,12 +142,7 @@
                         layout:(UICollectionViewLayout * __unused)layout
       insetsForItemAtIndexPath:(NSIndexPath * __unused)indexPath {
 
-  // Delegate the cell margin definition to the controller
-  if ([(id)self.delegate respondsToSelector:@selector(configureMargins)]) {
-    return [self.delegate configureMargins];
-  }
-
-  return UIEdgeInsetsMake(1, 1, 1, 1);
+  return UIEdgeInsetsMake(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 #pragma mark - Helpers
