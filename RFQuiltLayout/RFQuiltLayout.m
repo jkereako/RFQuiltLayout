@@ -105,7 +105,7 @@
 
 - (void)initialize {
   // defaults
-  self.direction = UICollectionViewScrollDirectionVertical;
+  self.scrollDirection = UICollectionViewScrollDirectionVertical;
   self.cellSize = CGSizeMake(100.f, 100.f);
   self.preemptivelyRenderLayout = NO;
 }
@@ -120,7 +120,7 @@
   CGRect contentRect = UIEdgeInsetsInsetRect(self.collectionView.frame,
                                              self.collectionView.contentInset);
 
-  switch (self.direction) {
+  switch (self.scrollDirection) {
     case UICollectionViewScrollDirectionVertical:
       return CGSizeMake(CGRectGetWidth(contentRect),
                         (self.furthestCellPosition.y + 1) * self.cellSize.height);
@@ -148,7 +148,7 @@
   NSUInteger unboundStart = 0;
   NSUInteger unboundLength = 0;
 
-  switch (self.direction) {
+  switch (self.scrollDirection) {
     case UICollectionViewScrollDirectionVertical:
       unboundStart = (NSUInteger)(rect.origin.y / self.cellSize.height);
       unboundLength = (NSUInteger)(rect.size.height / self.cellSize.height);
@@ -252,7 +252,7 @@
                                   self.collectionView.contentOffset.y,
                                   self.collectionView.frame.size.width,
                                   self.collectionView.frame.size.height);
-  switch (self.direction) {
+  switch (self.scrollDirection) {
     case UICollectionViewScrollDirectionVertical:
       unboundIndex = (NSUInteger)(CGRectGetMaxY(scrollFrame) / self.cellSize.height) + 1;
       break;
@@ -284,7 +284,7 @@
   CGRect contentRect = UIEdgeInsetsInsetRect(self.collectionView.frame,
                                              self.collectionView.contentInset);
 
-  switch (self.direction) {
+  switch (self.scrollDirection) {
     case UICollectionViewScrollDirectionVertical:
       size = (NSUInteger)(CGRectGetWidth(contentRect) / self.cellSize.width);
       break;
@@ -303,8 +303,8 @@
 }
 
 #pragma mark - Property setters
-- (void)setDirection:(UICollectionViewScrollDirection)direction {
-  _direction = direction;
+- (void)setScrollDirection:(UICollectionViewScrollDirection)direction {
+  _scrollDirection = direction;
 
   [self invalidateLayout];
 }
@@ -344,7 +344,7 @@
         self.indexPathCache = indexPath;
       }
 
-      switch (self.direction) {
+      switch (self.scrollDirection) {
         case UICollectionViewScrollDirectionVertical:
           if (self.firstOpenSpace.y >= index) {
             return;
@@ -410,7 +410,7 @@
                                                            BOOL isInBounds = NO;
                                                            BOOL hasMaximumBoundSize = NO;
 
-                                                           switch (weakSelf.direction) {
+                                                           switch (weakSelf.scrollDirection) {
                                                              case UICollectionViewScrollDirectionVertical:
                                                                isInBounds = (point.x < weakSelf.maximumNumberOfItemsInBounds);
                                                                hasMaximumBoundSize = (blockOrigin.x == 0);
@@ -471,7 +471,7 @@
 
       CGPoint point = CGPointZero;
 
-      switch (self.direction) {
+      switch (self.scrollDirection) {
         case UICollectionViewScrollDirectionVertical:
           point = CGPointMake(bounds, unbound);
           break;
@@ -510,7 +510,7 @@
   BOOL allTakenBefore = YES;
   NSUInteger unboundIndex = 0;
 
-  switch (self.direction) {
+  switch (self.scrollDirection) {
     case UICollectionViewScrollDirectionVertical:
       unboundIndex = (NSUInteger)self.firstOpenSpace.y;
       break;
@@ -527,7 +527,7 @@
 
       CGPoint point = CGPointZero;
 
-      switch (self.direction) {
+      switch (self.scrollDirection) {
         case UICollectionViewScrollDirectionVertical:
           point = CGPointMake(boundIndex, unboundIndex);
           break;
@@ -569,7 +569,7 @@
   CGRect contentRect = UIEdgeInsetsInsetRect(self.collectionView.frame,
                                              self.collectionView.contentInset);
 
-  switch (self.direction) {
+  switch (self.scrollDirection) {
     case UICollectionViewScrollDirectionVertical: {
       CGFloat width = CGRectGetWidth(contentRect);
       // Because the cells vary in size, we must pad the cells to center them on the view. This will
@@ -627,7 +627,7 @@
 - (NSIndexPath *)indexPathForPosition:(CGPoint)position {
   NSNumber *unboundPoint, *boundPoint;
 
-  switch (self.direction) {
+  switch (self.scrollDirection) {
     case UICollectionViewScrollDirectionVertical:
       unboundPoint = @(position.y);
       boundPoint = @(position.x);
@@ -653,7 +653,7 @@
 
   NSNumber *unboundPoint, *boundPoint;
 
-  switch (self.direction) {
+  switch (self.scrollDirection) {
     case UICollectionViewScrollDirectionVertical:
       unboundPoint = @(point.y);
       boundPoint = @(point.x);

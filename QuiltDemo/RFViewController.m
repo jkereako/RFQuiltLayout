@@ -31,7 +31,7 @@
 
   // Fetch the collection view layout and set the properties
   RFQuiltLayout *layout = (RFQuiltLayout *)self.collectionView.collectionViewLayout;
-  layout.direction = UICollectionViewScrollDirectionVertical;
+  layout.scrollDirection = UICollectionViewScrollDirectionVertical;
   layout.cellSize = CGSizeMake(75, 75);
   layout.preemptivelyRenderLayout = NO;
 

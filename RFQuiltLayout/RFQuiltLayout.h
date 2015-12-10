@@ -23,7 +23,7 @@
 @property (nonatomic, weak) IBOutlet NSObject<RFQuiltLayoutDelegate>* delegate;
 
 @property (nonatomic) CGSize cellSize; // defaults to 100x100
-@property (nonatomic) UICollectionViewScrollDirection direction; // defaults to vertical
+@property (nonatomic) UICollectionViewScrollDirection scrollDirection; // defaults to vertical
 
 // Set this only if you have fewer than 1,000 items. This provides the correct size from the start
 // and improves scrolling speed at the cost of extra loading time in the beginning.
