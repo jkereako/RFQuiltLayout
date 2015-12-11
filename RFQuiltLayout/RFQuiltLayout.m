@@ -176,9 +176,9 @@
   NSMutableSet *attributes = [NSMutableSet set];
   [self traverseCellsBetweenBounds:unboundIndexStart
                                and:unboundIndexEnd
-                             block:^(CGPoint point) {
-                               NSIndexPath* indexPath;
-                               indexPath = [weakSelf indexPathForPosition:point];
+                             block:^(CGPoint position) {
+                               NSIndexPath *indexPath;
+                               indexPath = [weakSelf indexPathForPosition:position];
 
                                if(indexPath) {
                                  [attributes addObject:[weakSelf layoutAttributesForItemAtIndexPath:indexPath]];
