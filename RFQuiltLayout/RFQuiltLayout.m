@@ -154,7 +154,7 @@
       unboundLength = (NSUInteger)(rect.size.height / self.cellSize.height);
       break;
 
-    default:
+    case UICollectionViewScrollDirectionHorizontal:
       unboundStart = (NSUInteger)(rect.origin.x / self.cellSize.width);
       unboundLength = (NSUInteger)((rect.size.width / self.cellSize.width) + 1);
       break;
@@ -613,7 +613,8 @@
       respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)]
      ) {
     size = [self.delegate collectionView:[self collectionView]
-                                  layout:self sizeForItemAtIndexPath:indexPath];
+                                  layout:self
+                  sizeForItemAtIndexPath:indexPath];
   }
 
   return size;
