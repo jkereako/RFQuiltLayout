@@ -66,7 +66,7 @@
 
 //-- Cell traversal
 - (BOOL)traverseCellsBetweenBounds:(NSUInteger)start and:(NSUInteger)end
-                             block:(BOOL(^)(CGPoint))block;
+                             block:(void(^)(CGPoint))block;
 - (BOOL)traverseCellsForPosition:(CGPoint)point withSize:(CGSize)size block:(BOOL(^)(CGPoint))block;
 - (BOOL)traverseOpenCells:(BOOL(^)(CGPoint))block;
 
@@ -183,8 +183,6 @@
                                if(indexPath) {
                                  [attributes addObject:[weakSelf layoutAttributesForItemAtIndexPath:indexPath]];
                                }
-
-                               return YES;
                              }];
 
   // Cache the layout attributes
@@ -466,7 +464,7 @@
 // returning no in the callback will
 // terminate the iterations early
 #pragma mark Cell traversal
-- (BOOL)traverseCellsBetweenBounds:(NSUInteger)start and:(NSUInteger)end block:(BOOL(^)(CGPoint))block {
+- (BOOL)traverseCellsBetweenBounds:(NSUInteger)start and:(NSUInteger)end block:(void(^)(CGPoint))block {
   NSUInteger unbound = 0;
   NSUInteger bounds = 0;
 
@@ -485,9 +483,7 @@
           break;
       }
 
-      if(!block(point)) {
-        return NO;
-      }
+      block(point);
     }
   }
 
