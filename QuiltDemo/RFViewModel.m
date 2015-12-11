@@ -10,9 +10,9 @@
 
 @interface RFViewModel ()
 
-@property (nonatomic) NSMutableArray* numbers;
-@property (nonatomic) NSMutableArray* numberWidths;
-@property (nonatomic) NSMutableArray* numberHeights;
+@property (nonatomic) NSMutableArray *numbers;
+@property (nonatomic) NSMutableArray *cellWidths;
+@property (nonatomic) NSMutableArray *cellHeights;
 
 - (NSUInteger)randomLength;
 
@@ -32,18 +32,18 @@
 
 - (void)refreshData {
   NSMutableArray *someNumbers = [@[] mutableCopy];
-  NSMutableArray *someNumberWidths = @[].mutableCopy;
-  NSMutableArray *someNumberHeights = @[].mutableCopy;
+  NSMutableArray *someCellWidths = @[].mutableCopy;
+  NSMutableArray *someCellHeights = @[].mutableCopy;
 
   for(NSUInteger i = 0; i < 15; i ++) {
     [someNumbers addObject:@(i)];
-    [someNumberWidths addObject:@([self randomLength])];
-    [someNumberHeights addObject:@([self randomLength])];
+    [someCellWidths addObject:@([self randomLength])];
+    [someCellHeights addObject:@([self randomLength])];
   }
 
   self.numbers = someNumbers;
-  self.numberWidths = someNumberWidths;
-  self.numberHeights = someNumberHeights;
+  self.cellWidths = someCellWidths;
+  self.cellHeights = someCellHeights;
 }
 
 - (void)collectionView:(UICollectionView *)cv
@@ -65,10 +65,10 @@
     [weakSelf.numbers insertObject:@(weakSelf.numbers.count + 1)
                            atIndex: (NSUInteger)index];
 
-    [weakSelf.numberWidths insertObject:@(1 + arc4random() % 3)
+    [weakSelf.cellWidths insertObject:@(1 + arc4random() % 3)
                                 atIndex: (NSUInteger)index];
 
-    [weakSelf.numberHeights insertObject:@(1 + arc4random() % 3)
+    [weakSelf.cellHeights insertObject:@(1 + arc4random() % 3)
                                  atIndex: (NSUInteger)index];
 
     [cv insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow: (NSInteger)index inSection: 0]]];
@@ -95,8 +95,8 @@
   [cv performBatchUpdates:^{
     NSInteger index = indexPath.row;
     [weakSelf.numbers removeObjectAtIndex:(NSUInteger)index];
-    [weakSelf.numberWidths removeObjectAtIndex:(NSUInteger)index];
-    [weakSelf.numberHeights removeObjectAtIndex:(NSUInteger)index];
+    [weakSelf.cellWidths removeObjectAtIndex:(NSUInteger)index];
+    [weakSelf.cellHeights removeObjectAtIndex:(NSUInteger)index];
     [cv deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:(NSInteger)index inSection:0]]];
   }
                completion:^(BOOL done __unused) {
@@ -132,8 +132,8 @@
   
   NSAssert(indexPath.row <= self.numbers.count, @"\n\n  ERROR: Requested non-existant cell.");
 
-  CGFloat width = [self.numberWidths[(NSUInteger)indexPath.row] floatValue];
-  CGFloat height = [self.numberHeights[(NSUInteger)indexPath.row] floatValue];
+  CGFloat width = [self.cellWidths[(NSUInteger)indexPath.row] floatValue];
+  CGFloat height = [self.cellHeights[(NSUInteger)indexPath.row] floatValue];
 
   return CGSizeMake(width, height);
 }
