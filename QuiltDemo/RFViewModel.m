@@ -14,7 +14,7 @@
 @property (nonatomic) NSMutableArray *cellWidths;
 @property (nonatomic) NSMutableArray *cellHeights;
 
-- (NSUInteger)randomLength;
+- (NSUInteger)randomInteger;
 
 @end
 
@@ -37,8 +37,8 @@
 
   for(NSUInteger i = 0; i < 15; i ++) {
     [someNumbers addObject:@(i)];
-    [someCellWidths addObject:@([self randomLength])];
-    [someCellHeights addObject:@([self randomLength])];
+    [someCellWidths addObject:@([self randomInteger])];
+    [someCellHeights addObject:@([self randomInteger])];
   }
 
   self.numbers = someNumbers;
@@ -146,7 +146,7 @@
 }
 
 #pragma mark - Helpers
-- (NSUInteger)randomLength {
+- (NSUInteger)randomInteger {
   // always returns a random length between 1 and 3, weighted towards lower numbers.
   NSUInteger random = arc4random() % 6;
 
