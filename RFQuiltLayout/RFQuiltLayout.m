@@ -65,7 +65,7 @@
 - (BOOL)insertCellAtIndexPath:(NSIndexPath *)indexPath;
 
 //-- Cell traversal
-- (BOOL)traverseCellsBetweenBounds:(NSUInteger)start and:(NSUInteger)end
+- (void)traverseCellsBetweenBounds:(NSUInteger)start and:(NSUInteger)end
                              block:(void(^)(CGPoint))block;
 - (BOOL)traverseCellsForPosition:(CGPoint)point withSize:(CGSize)size block:(BOOL(^)(CGPoint))block;
 - (BOOL)traverseOpenCells:(BOOL(^)(CGPoint))block;
@@ -464,30 +464,28 @@
 // returning no in the callback will
 // terminate the iterations early
 #pragma mark Cell traversal
-- (BOOL)traverseCellsBetweenBounds:(NSUInteger)start and:(NSUInteger)end block:(void(^)(CGPoint))block {
+- (void)traverseCellsBetweenBounds:(NSUInteger)start and:(NSUInteger)end block:(void(^)(CGPoint))block {
   NSUInteger unbound = 0;
   NSUInteger bounds = 0;
 
   for(unbound = start; unbound < end; unbound++) {
     for(bounds = 0; bounds < self.maximumNumberOfItemsInBounds; bounds++) {
 
-      CGPoint point = CGPointZero;
+      CGPoint position = CGPointZero;
 
       switch (self.scrollDirection) {
         case UICollectionViewScrollDirectionVertical:
-          point = CGPointMake(bounds, unbound);
+          position = CGPointMake(bounds, unbound);
           break;
 
         case UICollectionViewScrollDirectionHorizontal:
-          point = CGPointMake(unbound, bounds);
+          position = CGPointMake(unbound, bounds);
           break;
       }
 
-      block(point);
+      block(position);
     }
   }
-
-  return YES;
 }
 
 - (BOOL)traverseCellsForPosition:(CGPoint)point withSize:(CGSize)size block:(BOOL(^)(CGPoint))block {
