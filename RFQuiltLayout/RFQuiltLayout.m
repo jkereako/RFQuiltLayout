@@ -517,28 +517,28 @@
 
     for(boundIndex = 0; boundIndex < self.maximumNumberOfItemsInBounds; boundIndex++) {
 
-      CGPoint point = CGPointZero;
+      CGPoint position = CGPointZero;
 
       switch (self.scrollDirection) {
         case UICollectionViewScrollDirectionVertical:
-          point = CGPointMake(boundIndex, unboundIndex);
+          position = CGPointMake(boundIndex, unboundIndex);
           break;
 
         case UICollectionViewScrollDirectionHorizontal:
-          point = CGPointMake(unboundIndex, boundIndex);
+          position = CGPointMake(unboundIndex, boundIndex);
           break;
       }
 
-      if([self indexPathForPosition:point]) {
+      if([self indexPathForPosition:position]) {
         continue;
       }
 
       if(allTakenBefore) {
-        self.firstOpenSpace = point;
+        self.firstOpenSpace = position;
         allTakenBefore = NO;
       }
 
-      if(!block(point)) {
+      if(!block(position)) {
         // break;
         return NO;
       }
@@ -546,10 +546,6 @@
 
     unboundIndex++;
   } while (true);
-
-  NSAssert(0, @"Unable to find a insertion point for a cell.");
-
-  return YES;
 }
 
 #pragma mark Getters
