@@ -104,7 +104,7 @@
   }
 
   // Select a random index path
-  NSIndexPath *indexPath = [visibleIndexPaths objectAtIndex:(arc4random() % visibleIndexPaths.count)];
+  NSIndexPath *indexPath = visibleIndexPaths[arc4random() % visibleIndexPaths.count];
 
   RFViewController * __weak weakSelf = self;
 
