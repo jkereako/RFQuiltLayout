@@ -648,7 +648,7 @@
       boundPoint = @(point.x);
       break;
 
-    default:
+    case UICollectionViewScrollDirectionHorizontal:
       unboundPoint = @(point.x);
       boundPoint = @(point.y);
       break;
