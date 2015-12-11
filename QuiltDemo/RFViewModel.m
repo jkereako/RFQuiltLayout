@@ -30,19 +30,17 @@
 }
 
 - (void)refreshData {
-  NSMutableArray *someNumbers = [@[] mutableCopy];
-  NSMutableArray *someCellWidths = @[].mutableCopy;
-  NSMutableArray *someCellHeights = @[].mutableCopy;
+  // Reset the properties
+  self.numbers = @[].mutableCopy;
+  self.cellWidths = @[].mutableCopy;
+  self.cellHeights = @[].mutableCopy;
 
+  // Assign new values
   for(NSUInteger i = 0; i < 15; i ++) {
-    [someNumbers addObject:@(i)];
-    [someCellWidths addObject:@(self.randomInteger)];
-    [someCellHeights addObject:@(self.randomInteger)];
+    [self.numbers addObject:@(i)];
+    [self.cellWidths addObject:@(self.randomInteger)];
+    [self.cellHeights addObject:@(self.randomInteger)];
   }
-
-  self.numbers = someNumbers;
-  self.cellWidths = someCellWidths;
-  self.cellHeights = someCellHeights;
 }
 
 - (void)collectionView:(UICollectionView *)cv
