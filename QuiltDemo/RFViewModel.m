@@ -62,10 +62,10 @@
     [weakSelf.numbers insertObject:@(weakSelf.numbers.count + 1)
                            atIndex: (NSUInteger)index];
 
-    [weakSelf.cellWidths insertObject:@(1 + arc4random() % 3)
+    [weakSelf.cellWidths insertObject:@(weakSelf.randomInteger)
                                 atIndex: (NSUInteger)index];
 
-    [weakSelf.cellHeights insertObject:@(1 + arc4random() % 3)
+    [weakSelf.cellHeights insertObject:@(weakSelf.randomInteger)
                                  atIndex: (NSUInteger)index];
 
     [cv insertItemsAtIndexPaths:@[[NSIndexPath indexPathForRow: (NSInteger)index inSection: 0]]];
