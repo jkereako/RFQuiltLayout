@@ -57,7 +57,6 @@
 @property(nonatomic, readonly) NSUInteger maximumNumberOfItemsInBounds;
 
 - (void)initialize;
-- (void)clearPositions;
 
 //-- Cell insertion
 - (void)insertCellsToUnboundIndex:(NSUInteger)index;
@@ -108,11 +107,6 @@
   self.scrollDirection = UICollectionViewScrollDirectionVertical;
   self.cellSize = CGSizeMake(100.f, 100.f);
   self.preemptivelyRenderLayout = NO;
-}
-
-- (void)clearPositions {
-  self.indexPathByPosition = [NSMutableDictionary dictionary];
-  self.positionByIndexPath = [NSMutableDictionary dictionary];
 }
 
 #pragma mark - Overridden methods
@@ -229,13 +223,13 @@
 - (void)invalidateLayout {
   [super invalidateLayout];
 
-  _furthestCellPosition = CGPointZero;
+  self.furthestCellPosition = CGPointZero;
   self.firstOpenSpace = CGPointZero;
   self.layoutRectCache = CGRectZero;
   self.layoutAttributesCache = nil;
   self.indexPathCache = nil;
-
-  [self clearPositions];
+  self.indexPathByPosition = [NSMutableDictionary dictionary];
+  self.positionByIndexPath = [NSMutableDictionary dictionary];
 }
 
 - (void)prepareLayout {
