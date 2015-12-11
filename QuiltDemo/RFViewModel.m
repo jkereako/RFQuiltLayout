@@ -13,8 +13,7 @@
 @property (nonatomic) NSMutableArray *numbers;
 @property (nonatomic) NSMutableArray *cellWidths;
 @property (nonatomic) NSMutableArray *cellHeights;
-
-- (NSUInteger)randomInteger;
+@property (nonatomic, readonly) NSUInteger randomInteger;
 
 @end
 
@@ -37,8 +36,8 @@
 
   for(NSUInteger i = 0; i < 15; i ++) {
     [someNumbers addObject:@(i)];
-    [someCellWidths addObject:@([self randomInteger])];
-    [someCellHeights addObject:@([self randomInteger])];
+    [someCellWidths addObject:@(self.randomInteger)];
+    [someCellHeights addObject:@(self.randomInteger)];
   }
 
   self.numbers = someNumbers;
@@ -104,6 +103,25 @@
                }];
 }
 
+#pragma mark - Getters
+- (NSUInteger)randomInteger {
+  // always returns a random length between 1 and 3, weighted towards lower numbers.
+  NSUInteger random = arc4random() % 6;
+
+  switch (random) {
+    case 0:
+    case 1:
+    case 2:
+      return 1;
+
+    case 5:
+      return 3;
+
+    default:
+      return 2;
+  }
+}
+
 #pragma mark - Collection view data source
 - (NSInteger)collectionView:(UICollectionView * __unused)view
      numberOfItemsInSection:(NSInteger __unused)section {
@@ -143,25 +161,6 @@
       insetsForItemAtIndexPath:(NSIndexPath * __unused)indexPath {
 
   return UIEdgeInsetsMake(1.0f, 1.0f, 1.0f, 1.0f);
-}
-
-#pragma mark - Helpers
-- (NSUInteger)randomInteger {
-  // always returns a random length between 1 and 3, weighted towards lower numbers.
-  NSUInteger random = arc4random() % 6;
-
-  switch (random) {
-    case 0:
-    case 1:
-    case 2:
-      return 1;
-
-    case 5:
-      return 3;
-
-    default:
-      return 2;
-  }
 }
 
 @end
