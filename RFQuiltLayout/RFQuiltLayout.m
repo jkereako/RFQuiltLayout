@@ -145,37 +145,37 @@
   self.layoutRectCache = rect;
 
   // "Unbound" means, for example, the number of rows in a vertically scrolling view
-  NSUInteger unboundStart = 0;
-  NSUInteger unboundLength = 0;
+  NSUInteger unboundIndexStart = 0;
+  NSUInteger length = 0;
 
   switch (self.scrollDirection) {
     case UICollectionViewScrollDirectionVertical:
-      unboundStart = (NSUInteger)(rect.origin.y / self.cellSize.height);
-      unboundLength = (NSUInteger)(rect.size.height / self.cellSize.height);
+      unboundIndexStart = (NSUInteger)(rect.origin.y / self.cellSize.height);
+      length = (NSUInteger)(rect.size.height / self.cellSize.height);
       break;
 
     case UICollectionViewScrollDirectionHorizontal:
-      unboundStart = (NSUInteger)(rect.origin.x / self.cellSize.width);
-      unboundLength = (NSUInteger)((rect.size.width / self.cellSize.width) + 1);
+      unboundIndexStart = (NSUInteger)(rect.origin.x / self.cellSize.width);
+      length = (NSUInteger)((rect.size.width / self.cellSize.width) + 1);
       break;
   }
 
-  NSUInteger unboundEnd = unboundStart + unboundLength;
+  NSUInteger unboundIndexEnd = unboundIndexStart + length;
 
   if (self.shouldPreemptivelyRenderLayout) {
     [self insertCellsToUnboundIndex:INT_MAX];
   }
 
   else {
-    [self insertCellsToUnboundIndex:unboundEnd];
+    [self insertCellsToUnboundIndex:unboundIndexEnd];
   }
 
   RFQuiltLayout * __weak weakSelf = self;
 
   // find the indexPaths between those rows
   NSMutableSet *attributes = [NSMutableSet set];
-  [self traverseCellsBetweenBounds:unboundStart
-                               and:unboundEnd
+  [self traverseCellsBetweenBounds:unboundIndexStart
+                               and:unboundIndexEnd
                              block:^(CGPoint point) {
                                NSIndexPath* indexPath;
                                indexPath = [weakSelf indexPathForPosition:point];
